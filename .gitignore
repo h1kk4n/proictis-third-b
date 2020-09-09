@@ -18,7 +18,6 @@
 
 ### Windows ###
 # Windows thumbnail cache files
-config.py
 *.key
 Thumbs.db
 Thumbs.db:encryptable
