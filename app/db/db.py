@@ -126,5 +126,3 @@ if __name__ == '__main__':
     # print(Base.metadata.tables['teams'].create(bind=engine))
 
     fully_refill_database()
-
-
