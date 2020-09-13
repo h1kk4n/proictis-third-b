@@ -1,8 +1,5 @@
-import os
 import json
 import gspread
-import gspread.utils
-import gspread_formatting
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
