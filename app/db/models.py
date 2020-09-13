@@ -1,14 +1,8 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import Column, Integer, String, create_engine
-
-from config import Config
+from sqlalchemy import Column, Integer, String
 
 
 Base = declarative_base()
-
-engine = create_engine(Config.DATABASE_URI)
-Session = sessionmaker(bind=engine)
 
 
 class FirstProject(Base):

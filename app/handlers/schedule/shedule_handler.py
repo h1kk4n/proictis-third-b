@@ -29,7 +29,7 @@ def get_schedule(request_data, week_num=None):
         if not os.path.exists(schedule_dir):
             os.mkdir(schedule_dir)
 
-        response = requests.get(Config.shedule_url, params={'query': request_data})
+        response = requests.get(Config.schedule_url, params={'query': request_data})
         response.raise_for_status()
 
         response = response.json()
@@ -38,7 +38,7 @@ def get_schedule(request_data, week_num=None):
 
             group = response['table']['group']
             if week_num is not None:
-                response = requests.get(Config.shedule_url, params={'group': group, 'week': week_num}).json()
+                response = requests.get(Config.schedule_url, params={'group': group, 'week': week_num}).json()
 
             # Checks if schedule if for students group, teacher or audience
             if group.startswith('a'):

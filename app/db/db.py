@@ -1,16 +1,31 @@
 import os
+import json
 import gspread
 import gspread.utils
 import gspread_formatting
 
-from app.db.models import Base, Session, engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+
+from oauth2client.service_account import ServiceAccountCredentials
+
+from app.db.models import Base
 from app.db.models import FirstProject, SecondProject, Team
 
-secret_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../service_account_secret.json')
-service = gspread.service_account(filename=secret_dir)
+from config import Config
+
+scopes = ['https://spreadsheets.google.com/feeds']
+
+creds_dict = json.loads(Config.GOOGLE_SERVICE_ACCOUNT)
+creds_dict["private_key"] = creds_dict["private_key"].replace("\\\\n", "\n")
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scopes)
+service = gspread.authorize(creds)
+
+engine = create_engine(Config.DATABASE_URL)
+Session = sessionmaker(bind=engine)
 
 
-def recreate_database(engine):
+def recreate_database():
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
 
@@ -79,7 +94,6 @@ def fill_teams(project_id):
             team_name = values[i][col]
             if team_name:
                 members = []
-                captain = ''
                 for j in range(1, 9):
                     member = values[i + j][col]
                     members.append(member)
@@ -96,15 +110,13 @@ def fill_teams(project_id):
                     member_8=members[7]
                 )
 
-                print(team)
-
                 session.add(team)
         session.commit()
         session.close()
 
 
 def fully_refill_database():
-    recreate_database(engine)
+    recreate_database()
     fill_projects('1bzRdpJMghpo0fvUtd5CInKh96tdSikiAdg9fnK3nLLs', FirstProject)
     fill_teams('1bzRdpJMghpo0fvUtd5CInKh96tdSikiAdg9fnK3nLLs')
 
