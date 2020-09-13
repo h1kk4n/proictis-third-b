@@ -11,6 +11,8 @@ if os.path.exists(env_path):
 class Config:
     TOKEN = os.environ.get("BOT_TOKEN", None)
 
+    PORT = int(os.environ.get('PORT', 5000))
+
     # SQL_USER = os.environ.get("SQL_USER", None)
     # SQL_PASS = os.environ.get("SQL_PASS", None)
     # SQL_IP = os.environ.get("SQL_IP", None)
