@@ -6,8 +6,8 @@ from sqlalchemy import create_engine
 
 from oauth2client.service_account import ServiceAccountCredentials
 
-from app.db.models import Base
-from app.db.models import FirstProject, SecondProject, Team
+from models import Base
+from models import FirstProject, SecondProject, Team
 
 from config import Config
 

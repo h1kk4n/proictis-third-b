@@ -4,8 +4,8 @@ from telegram import InlineKeyboardMarkup
 from telegram import InlineKeyboardButton
 
 from app import dp
-from app.db.db import Session
-from app.db.models import FirstProject, SecondProject
+from db import Session
+from models import FirstProject, SecondProject
 
 
 # General functions
