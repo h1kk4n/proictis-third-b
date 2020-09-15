@@ -10,7 +10,7 @@ def do_start_and_help(update, context):
 Вот что я могу:\n\
 /login - Авторизация через сайт проектного офиса\n\
 /mentors – Список наставников\n\
-/calendar - Расписание\n\
+/schedule - Расписание\n\
 /project - Список проектов\n\
 /news - Последние новости\n\
 /manual - Руководство по проекту\n\

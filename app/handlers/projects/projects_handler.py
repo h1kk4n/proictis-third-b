@@ -4,8 +4,8 @@ from telegram import InlineKeyboardMarkup
 from telegram import InlineKeyboardButton
 
 from app import dp
-from db import Session
-from models import FirstProject, SecondProject
+from app.db.db import Session
+from app.db.models import FirstProject, SecondProject
 
 
 # General functions
@@ -53,6 +53,7 @@ def projects_end(update, context):
 
 # Первый творческий проект
 def first_project_themes(update, context):
+    print(update.message.message_id)
     themes_list = get_project_themes_list(FirstProject)
 
     bot_message = 'Темы первого творческого проекта:\n\n' + themes_list

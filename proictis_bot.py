@@ -14,11 +14,14 @@ if __name__ == '__main__':
         text='Бот включен'
     )
 
+
     updater.start_webhook(
         listen='0.0.0.0',
         port=int(Config.PORT),
         url_path=Config.TOKEN
     )
     updater.bot.setWebhook('https://warm-headland-36871.herokuapp.com/'+Config.TOKEN)
+
+    # updater.start_polling()
 
     updater.idle()
