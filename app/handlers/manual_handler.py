@@ -1,11 +1,9 @@
 # БЕТА, БУДУ ПЕРЕПРОВЕРЯТЬ, НЕ БЫЛО ВОЗМОЖНОСТИ ПРОВЕРИТЬ НА БОТЕ
-from telegram import InlineKeyboardButton
-from telegram import InlineKeyboardMarkup
+import os.path
+from telegram.ext import InlineKeyboardButton
+from telegram.ext import InlineKeyboardMarkup
 from telegram.ext import CommandHandler
 from telegram.ext import CallbackQueryHandler
-import datetime
-
-from app import dp
 
 CALLBACK_BUTTON1 = "callback_button1"
 CALLBACK_BUTTON2 = "callback_button2"
@@ -21,153 +19,107 @@ TITLES = {
   CALLBACK_BUTTON4: "Требование к оформлению проекта",
   CALLBACK_BUTTON5: "Наставники",
   CALLBACK_BUTTON6: "Проекты",
+  CALLBACK_BUTTON7: "Обратно",
 }
 
+def get_navmenu_keyboard():
+    keyboard = [
+        [InlineKeyboardButton(TITLES[CALLBACK_BUTTON7], callback_data=CALLBACK_BUTTON7),],
+    ]
 
 def get_manual_keyboard():
-    keyboard = [
-        [InlineKeyboardButton(TITLES[CALLBACK_BUTTON1], callback_data=CALLBACK_BUTTON1)],
-        [InlineKeyboardButton(TITLES[CALLBACK_BUTTON2], callback_data=CALLBACK_BUTTON2)],
-        [InlineKeyboardButton(TITLES[CALLBACK_BUTTON3], callback_data=CALLBACK_BUTTON3)],
-        [InlineKeyboardButton(TITLES[CALLBACK_BUTTON4], callback_data=CALLBACK_BUTTON4)],
-        [InlineKeyboardButton(TITLES[CALLBACK_BUTTON5], callback_data=CALLBACK_BUTTON5)],
-        [InlineKeyboardButton(TITLES[CALLBACK_BUTTON6], callback_data=CALLBACK_BUTTON6)],
-    ]
-    return InlineKeyboardMarkup(keyboard)
+  keyboard = [
+        [InlineKeyboardButton(TITLES[CALLBACK_BUTTON1], callback_data=CALLBACK_BUTTON1),],
+        [InlineKeyboardButton(TITLES[CALLBACK_BUTTON2], callback_data=CALLBACK_BUTTON2),],
+        [InlineKeyboardButton(TITLES[CALLBACK_BUTTON3], callback_data=CALLBACK_BUTTON3),],
+        [InlineKeyboardButton(TITLES[CALLBACK_BUTTON4], callback_data=CALLBACK_BUTTON4),],
+        [InlineKeyboardButton(TITLES[CALLBACK_BUTTON5], callback_data=CALLBACK_BUTTON5),],
+        [InlineKeyboardButton(TITLES[CALLBACK_BUTTON6], callback_data=CALLBACK_BUTTON6),],
+  ]
+  return InlineKeyboardMarkup(keyboard)
 
+def do_manual(update, context):
+    bot.send_message(
+        chat = chat_id,
+        text = "<b>Мануал:<b>";
+        reply_markup = get_manual_keyboard(),
+    )
 
-def keyboard_callback_handler(bot, update):
-    query = update.callback_query
-    data = query.data
-    now = datetime.datetime.now()
+def keyboard_callback_handler(bot: Bot, update: Update, chat_data=None, **kwargs):
+  query = update.callback_query
+  data = query.data
+  now = datetime.datetime.now()
+  
+  chat_id = update.effective_message.chat_id
+  current_text = update.effective_message.text
+  
+  if data = CALLBACK_BUTTON1:
+        query.edit_message_text(
+            text = ,
+            chat = chat_id,
+            reply_markup=get_navmenu_keyboard(),
+        )
+        if data = CALLBACK_BUTTON7:
+            query.edit_message_text(
+                text = "<b>Мануал:<b>",
+                reply_markup = get_manual_keyboard(),
+            )
 
-    chat_id = update.effective_message.chat_id
-    current_text = update.effective_message.text
-
-    if data == CALLBACK_BUTTON1:
+  elif data = CALLBACK_BUTTON2:
         query.edit_message_text(
-            text="""О ПРОЕКТНОМ ОФИСЕ\n
-Основной целью деятельности Проектного офиса является увеличение количества обучающихся и молодых ученых, которые смогут применять на практике полученные ими теоретические знания в ситуациях практической деятельности c возможностью создания компаний - стартапов, способных продолжать работу, начатую в рамках проектной деятельности либо самостоятельно, либо в партнерстве с внешними заказчиками.\n
-Задачи Проектного офиса:\n
-· стимулирование инновационной предпринимательской активности обучающихся, молодых ученых и их вовлечение в инженерную проектную деятельность;\n
-· расширение форм взаимодействия между университетским и бизнес - сообществом;\n
-· развитие навыков и компетенций у обучающихся и молодых ученых, связанных с инновационной предпринимательской и проектной деятельностью;\n
-· создание условий для привлечения обучающихся к деятельности Проектного офиса, содействие в приобретение ими знаний и опыта в проектной и научно-организационной деятельности под руководством научно-педагогических работников и ведущих специалистов;\n
-· планирование и контроль реализации проектов; взаимодействие с внешними партнерами для привлечения новых идей и проектов;\n
-· участие в международных, российских, региональных научно-технических программах, конкурсах и грантах по тематике проектов.""",
+            text = ,
+            chat = chat_id,
+            reply_markup=get_navmenu_keyboard(),
         )
-        bot.send_message(
-            chat=chat_id,
-            text="Мануал:",
-            reply_markup=get_manual_keyboard(),
-        )
-    elif data == CALLBACK_BUTTON2:
+        if data = CALLBACK_BUTTON7:
+            query.edit_message_text(
+                text = "<b>Мануал:<b>",
+                reply_markup = get_manual_keyboard(),
+            )
+  elif data = CALLBACK_BUTTON3:
         query.edit_message_text(
-            text="""ОРГАНИЗАЦИЯ ТП 1 КУРС\n
-Вот порядок проведения 1 творческого проекта:\n
-Отбор тем творческих проектов: 1.09 – 1.11\n
-Размещение наставниками технических заданий в системе электронного обучения ИКТИБ: до 1.12\n
-Выбор студентами темы проекта и формирование проектных команд : до 1.01\n
-Выбор капитана команды, распределение ролей в команде, составление плана выполнения проекта: до 1.03\n 
-Первый промежуточный отчет: до 15.04\n
-Второй промежуточный отчет: до 1.06\n
-Третий промежуточный отчет: до 1.10\n
-Индивидуальная оценка членов команды. Сдача печатного варианта пояснительной записки: до 15.10\n
-Загрузка капитаном презентации проекта. Выставление наставником баллов за пояснительную записку: до 20.10\n
-Защита проекта: 20.10 - 5.11""",
+            text = ,
+            chat = chat_id,
+            reply_markup=get_navmenu_keyboard(),
         )
-        bot.send_message(
-            chat=chat_id,
-            text="Мануал:",
-            reply_markup=get_manual_keyboard(),
-        )
-    elif data == CALLBACK_BUTTON3:
+        if data = CALLBACK_BUTTON7:
+            query.edit_message_text(
+                text = "<b>Мануал:<b>",
+                reply_markup = get_manual_keyboard(),
+            )
+  elif data = CALLBACK_BUTTON4:
         query.edit_message_text(
-            text="""ОРГАНИЗАЦИЯ ТП 2 КУРС\n
-Вот порядок проведения 2 творческого проекта\n
-Отбор тем творческих проектов: 1.05 – 1.08\n
-Размещение наставниками технических заданий в системе электронного обучения ИКТИБ: до 1.09\n
-Выбор студентами темы проекта и формирование проектных команд : до 1.10\n
-Выбор капитана команды, распределение ролей в команде, составление плана выполнения проекта: до 1.12\n
-Первый промежуточный отчет: до 1.01\n
-Второй промежуточный отчет: до 1.03\n
-Третий промежуточный отчет: до 1.05\n
-Индивидуальная оценка членов команды. Сдача печатного варианта пояснительной записки: до до 15.05\n
-Загрузка капитаном презентации проекта. Выставление наставником баллов за пояснительную записку: до 20.05\n
-Защита проекта: 20.10 - 5.06""",
+            text = ,
+            chat = chat_id,
+            reply_markup=get_navmenu_keyboard(),
         )
-        bot.send_message(
-            chat=chat_id,
-            text="Мануал:",
-            reply_markup=get_manual_keyboard(),
-        )
-    elif data == CALLBACK_BUTTON4:
+        if data = CALLBACK_BUTTON7:
+            query.edit_message_text(
+                text = "<b>Мануал:<b>",
+                reply_markup = get_manual_keyboard(),
+            )
+  elif data = CALLBACK_BUTTON5:
         query.edit_message_text(
-            text="""ТРЕБОВАНИЯ К ОФОРМЛЕНИЮ ПРОЕКТА\n
-Перед защитой проектов капитанам нужно будет сделать и загрузить пояснительную записку\n
-Так же для защиты проекта командам нужна презентация по проделанной работе\n
-1. Пояснительная записка по проекту должна быть оформлена с соблюдением требований и содержать
-следующие разделы:\n
-– титульный лист;\n
-– список исполнителей с указанием обязанностей по реализации проекта;\n
-– реферат;\n
-– содержание;\n
-– определения, обозначения и сокращения (вариативно);\n
-– техническое задание на проект;\n
-– введение;\n
-– основная часть;\n
-– результаты проделанной работы (заключение);\n
-– список использованных источников (вариативно);\n
-– приложения.\n
-2. Структура презентации проекта должна включать разделы:\n
-– команда проекта;\n
-– техническое задание;\n
-– проблема;\n
-– предлагаемая технология решения проблемы;\n
-– продукт проекта;\n
-– оценка рынка;\n
-– план коммерциализации (для второго творческого проекта, если проект предусматривает
-коммерциализацию);\n
-– свободный раздел;\n
-– команда проекта / заключение.""",
+            text = ,
+            chat = chat_id,
+            reply_markup=get_navmenu_keyboard(),
         )
-        bot.send_message(
-            chat=chat_id,
-            text="Мануал:",
-            reply_markup=get_manual_keyboard(),
-        )
-    elif data == CALLBACK_BUTTON5:
+        if data = CALLBACK_BUTTON7:
+            query.edit_message_text(
+                text = "<b>Мануал:<b>",
+                reply_markup = get_manual_keyboard(),
+            )
+  elif data = CALLBACK+BUTTON6:
         query.edit_message_text(
-            text="""НАСТАВНИКИ\n
-Наставник — это опытный и знающий человек, передающий свой опыт молодому и не имеющему определенных компетенций студенту.\n
-Наставник помогает в постановке профессиональных целей и осуществляет совместный со студентом поиск способов их достижения.\n
-Наставник — это профессионал в своей области.\n
-Наставник помогает команде разобраться с реализацией идеи, с содержанием проекта, групповой динамикой.\n
-Наставник — это помощник и советчик в конкретной деятельности, дающий достаточно детальное и понятное руководство, но не опускающийся на уровень инструкций и алгоритмов.\n
-Наставник помогает команде или студенту, осуществляет сопровождение идеи от стадии реализации до продуктового результата. Вместе с наставником растет уровень и повышается эффективность проекта.\n
-Основные задачи наставников:\n
-Непосредственное руководство проектными командами и контроль выполнения творческих проектов;\n
-Вовлечение студентов в инновационный процесс;\n
-Выявление инициативных студентов, которые заинтересованы в дальнейшем развитии проектов и способных войти в состав коллектива Проектного офиса ИКТИБ с целью дальнейшей разработки и совершенствования своего проекта под руководством наставников для участия в различных инициативных конкурсах.\n
-Полный список наставников можно узнать, написав мне /mentors""",
+            text = ,
+            chat = chat_id,
+            reply_markup=get_navmenu_keyboard(),
         )
-        bot.send_message(
-            chat=chat_id,
-            text="Мануал:",
-            reply_markup=get_manual_keyboard(),
-        )
-    elif data == CALLBACK_BUTTON6:
-        query.edit_message_text(
-            text="""ПРОЕКТЫ\n
-Проект — это творческая деятельность, направленная на достижение определённой цели или решение какой-либо проблемы.\n
-Темы для проектов выбираются студентами из списка, предложенного кураторами, а также студенты могут предложить свою тему проекта сами на сайте проектного офиса.\n
-Текущие темы проектов можно узнать, написав мне /project""",
-        )
-        bot.send_message(
-            chat=chat_id,
-            text="Мануал:",
-            reply_markup=get_manual_keyboard(),
-        )
+        if data = CALLBACK_BUTTON7:
+            query.edit_message_text(
+                text = "<b>Мануал:<b>",
+                reply_markup = get_manual_keyboard(),
+            )
 
 
 dp.add_handler(CommandHandler(command='manual', callback=get_manual_keyboard))
