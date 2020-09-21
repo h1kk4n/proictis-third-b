@@ -1,10 +1,11 @@
 # БЕТА, БУДУ ПЕРЕПРОВЕРЯТЬ, НЕ БЫЛО ВОЗМОЖНОСТИ ПРОВЕРИТЬ НА БОТЕ
 # Файлы не подтянул пока что, но они лежал в папке manual
 import os.path
-from telegram.ext import InlineKeyboardButton
-from telegram.ext import InlineKeyboardMarkup
+from telegram import InlineKeyboardButton
+from telegram import InlineKeyboardMarkup
 from telegram.ext import CommandHandler
 from telegram.ext import CallbackQueryHandler
+import datetime
 
 CALLBACK_BUTTON1 = "callback_button1"
 CALLBACK_BUTTON2 = "callback_button2"
