@@ -102,6 +102,7 @@ def make_group_schedule(update, context, group_query, weekday_query=0, week_num=
         )
 
     else:
+        query = update.callback_query
 
         group = schedule['table']['name']
         week = schedule['table']['week']
@@ -121,11 +122,19 @@ def make_group_schedule(update, context, group_query, weekday_query=0, week_num=
         )
 
         if weekday_query == 6:
-            context.bot.send_message(
-                chat_id=update.message.chat_id,
-                text='Воскресенье, поздравляю, пар нет)',
-                reply_markup=keyboard_markup
-            )
+            if query is None:
+                context.bot.send_message(
+                    chat_id=update.message.chat_id,
+                    text='Воскресенье, поздравляю, пар нет)',
+                    reply_markup=keyboard_markup
+                )
+            else:
+                context.bot.edit_message_text(
+                    chat_id=query.message.chat_id,
+                    messsage_id=query.message.message_id,
+                    text='Воскресенье, поздравляю, пар нет)',
+                    reply_markup=keyboard_markup
+                )
 
         elif 0 <= weekday_query <= 5:
             nes_weekday = schedule['table']['table'][weekday_query + 2][0]
@@ -145,11 +154,19 @@ def make_group_schedule(update, context, group_query, weekday_query=0, week_num=
 
             bot_message += week_schedule
 
-            context.bot.send_message(
-                chat_id=update.message.chat_id,
-                text=bot_message,
-                reply_markup=keyboard_markup
-            )
+            if query is None:
+                context.bot.send_message(
+                    chat_id=update.message.chat_id,
+                    text=bot_message,
+                    reply_markup=keyboard_markup
+                )
+            else:
+                context.bot.edit_message_text(
+                    chat_id=query.message.chat_id,
+                    message_id=query.message.message_id,
+                    text=bot_message,
+                    reply_markup=keyboard_markup
+                )
 
         elif weekday_query > 6 or weekday_query < 0:
             add_weeks = weekday_query // 7
@@ -161,11 +178,19 @@ def make_group_schedule(update, context, group_query, weekday_query=0, week_num=
                 make_group_schedule(update, context, group_query, weekday_query, nes_week)
 
             else:
-                context.bot.send_message(
-                    chat_id=update.message.chat_id,
-                    text="Расписания либо еще нет, либо уже не будет. Попробуйте позже",
-                    reply_markup=keyboard_markup
-                )
+                if query is None:
+                    context.bot.send_message(
+                        chat_id=update.message.chat_id,
+                        text="Расписания либо еще нет, либо уже не будет. Попробуйте позже",
+                        reply_markup=keyboard_markup
+                    )
+                else:
+                    context.bot.edit_message_text(
+                        chat_id=query.message.chat_id,
+                        message_id=query.message.message_id,
+                        text="Расписания либо еще нет, либо уже не будет. Попробуйте позже",
+                        reply_markup=keyboard_markup
+                    )
 
 
 def show_schedule(update, context):
@@ -201,12 +226,7 @@ def change_day_schedule(update, context, week_day):
     group_query = query.data.split()[1]
     week = int(query.data.split()[2])
 
-    context.bot.delete_message(
-        chat_id=query.message.chat_id,
-        message_id=query.message.message_id
-    )
-
-    make_group_schedule(query, context, group_query, week_day, week)
+    make_group_schedule(update, context, group_query, week_day, week)
 
 
 def schedule_back(update, context):
@@ -255,13 +275,9 @@ def schedule_weekdays(update, context):
             )]
         )
 
-    context.bot.delete_message(
+    context.bot.edit_message_text(
         chat_id=query.message.chat_id,
         message_id=query.message.message_id,
-    )
-
-    context.bot.send_message(
-        chat_id=query.message.chat_id,
         text=bot_message,
         reply_markup=InlineKeyboardMarkup(week_keyboard)
     )
@@ -276,12 +292,7 @@ def schedule_from_week(update, context):
     week = int(data[2])
     weekday = int(data[3])
 
-    context.bot.delete_message(
-        chat_id=query.message.chat_id,
-        message_id=query.message.message_id,
-    )
-
-    make_group_schedule(query, context, group, weekday, week)
+    make_group_schedule(update, context, group, weekday, week)
 
 
 # All weeks
@@ -303,13 +314,9 @@ def show_all_schedule_weeks(update, context):
         ]
     )
 
-    context.bot.delete_message(
+    context.bot.edit_message_text(
         chat_id=query.message.chat_id,
-        message_id=query.message.message_id
-    )
-
-    context.bot.send_message(
-        chat_id=query.message.chat_id,
+        message_id=query.message.message_id,
         text=f'<b><i>Расписание {group}</i></b>:',
         reply_markup=reply_keyboard
     )

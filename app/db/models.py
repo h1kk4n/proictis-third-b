@@ -58,7 +58,7 @@ class Team(Base):
     member_8 = Column(String)
 
     def __repr__(self):
-        return f"<b>{ self.name }</b>\n\n" \
+        return f"Команда <b><i>{ self.name }</i></b>\n\n" \
                f"<b>Участники</b>:\n" \
                f"-{ self.member_1 or 'x' }\n" \
                f"-{ self.member_2 or 'x' }\n" \
