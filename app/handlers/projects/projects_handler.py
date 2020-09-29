@@ -410,11 +410,11 @@ def show_student_info(update, context):
     surname = student[0]
     name = student[1]
 
-    user = str(session.query(User).filter(
+    user = session.query(User).filter(
         User.surname == surname,
         User.name == name,
         User.role == 'student'
-    ).first())
+    ).first()
 
     if user:
         bot_message = f"<b><i>{user.surname} {user.name} {user.patronymic}</i></b>\n\n" \
