@@ -234,6 +234,6 @@ dp.add_handler(
             REG_PHONE: [MessageHandler(filters=Filters.text, callback=register_phone)],
             REG_PASS: [MessageHandler(filters=Filters.text, callback=register_pass)]
         },
-        fallbacks=[CommandHandler(command='cancel', callback=stop_register)]
+        fallbacks=[]
     )
 )

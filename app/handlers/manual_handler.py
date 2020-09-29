@@ -5,7 +5,6 @@ from telegram import InlineKeyboardButton
 from telegram import InlineKeyboardMarkup
 from telegram.ext import CommandHandler
 from telegram.ext import CallbackQueryHandler
-import datetime
 
 CALLBACK_BUTTON1 = "callback_button1"
 CALLBACK_BUTTON2 = "callback_button2"
@@ -43,7 +42,7 @@ def get_manual_keyboard():
 def do_manual(update, context):
     bot.send_message(
         chat = chat_id,
-        text = "<b>Мануал:<b>";
+        text = "<b>Мануал:<b>",
         reply_markup = get_manual_keyboard(),
     )
 

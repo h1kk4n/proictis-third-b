@@ -6,7 +6,11 @@ import requests
 
 from pprint import pprint
 
+from sqlalchemy.exc import IntegrityError
+
 from app import dp
+from app.db.models import User
+from app.db.db import Session
 from config import Config
 
 
@@ -30,19 +34,61 @@ def do_login_auth(update, context):
         'password': context.user_data['password']
     }
 
-    user_info = requests.post(
+    login_result = requests.post(
         url=LOGIN_URL,
         data=login_data
     ).json()
 
-    if user_info['auth']:
-        context.user_data.update(user_info['user'])
-        pprint(context.user_data)
-        context.user_data['logged'] = True
-        context.bot.sendMessage(
+    if login_result['auth']:
+        session = Session()
+        user_info = login_result['user']
+
+        user = ''
+
+        if user_info['role'] == 'student':
+            user = User(
+                tg_chat_id=update.message.chat_id,
+                role=user_info['role'],
+                surname=user_info['surname'],
+                name=user_info['name'],
+                patronymic=user_info['patronymic'],
+                group=user_info['group'],
+                email=user_info['email'],
+                phone=user_info['phone'],
+                post='',
+                directions=''
+            )
+
+        elif user_info['role'] == 'mentor':
+            user = User(
+                tg_chat_id=update.message.chat_id,
+                role=user_info['role'],
+                surname=user_info['surname'],
+                name=user_info['name'],
+                patronymic=user_info['patronymic'],
+                group='',
+                email=user_info['email'],
+                phone=user_info['phone'],
+                post=user_info['post'],
+                directions=user_info['directions']
+            )
+
+        else:
+            context.bot.send_message(
+                chat_id=update.message.chat_id,
+                text="Что-то пошло не так в последнюю секунду"
+            )
+            return ConversationHandler.END
+
+        session.add(user)
+        session.commit()
+
+        context.bot.send_message(
             chat_id=update.message.chat_id,
-            text=f"Здравствуйте, { context.user_data['name'] } { context.user_data['patronymic'] }. Вы авторизованы."
+            text=f"Здравствуйте, { user.name } { user.patronymic }. Вы авторизованы."
         )
+
+        session.close()
 
     else:
 
@@ -59,6 +105,7 @@ def do_login_auth(update, context):
                 text="Что-то пошло не так, попробуйте еще раз или позже."
             )
 
+    del context.user_data['email']
     del context.user_data['password']
 
     return ConversationHandler.END
@@ -81,45 +128,56 @@ def do_login_password(update, context):
 
 
 def do_login(update, context):
-    if len(context.args) > 2:
-        context.bot.delete_message(
-            chat_id=update.message.chat_id,
-            message_id=update.message.message_id
-        )
+    try:
+        session = Session()
+        user = session.query(User).filter(User.tg_chat_id == update.message.chat_id).first()
 
         context.bot.send_message(
             chat_id=update.message.chat_id,
-            text='Передано больше двух аргументов. Сообщение удалено, т.к. оно могло содержать пароль\n\n' +
-                 'Используя команду /login, вводите только электронную почту и пароль.'
+            text=f"Здравствуйте, {user.name} {user.patronymic}. Вы авторизованы."
         )
+        session.close()
 
-        return ConversationHandler.END
-
-    elif len(context.args) >= 1:
-        context.user_data['email'] = context.args[0]
-
-        if len(context.args) == 2:
-            context.user_data['password'] = context.args[1]
-
+    except:
+        if len(context.args) > 2:
             context.bot.delete_message(
                 chat_id=update.message.chat_id,
                 message_id=update.message.message_id
             )
 
-            return do_login_auth(update, context)
+            context.bot.send_message(
+                chat_id=update.message.chat_id,
+                text='Передано больше двух аргументов. Сообщение удалено, т.к. оно могло содержать пароль\n\n' +
+                     'Используя команду /login, вводите только электронную почту и пароль.'
+            )
 
-        context.bot.send_message(
-            chat_id=update.message.chat_id,
-            text='Введите пароль:'
-        )
-        return LOGIN_PASSWORD
+            return ConversationHandler.END
 
-    else:
-        context.bot.send_message(
-            chat_id=update.message.chat_id,
-            text='Введите вашу электронную почту:'
-        )
-        return LOGIN_EMAIL
+        elif len(context.args) >= 1:
+            context.user_data['email'] = context.args[0]
+
+            if len(context.args) == 2:
+                context.user_data['password'] = context.args[1]
+
+                context.bot.delete_message(
+                    chat_id=update.message.chat_id,
+                    message_id=update.message.message_id
+                )
+
+                return do_login_auth(update, context)
+
+            context.bot.send_message(
+                chat_id=update.message.chat_id,
+                text='Введите пароль:'
+            )
+            return LOGIN_PASSWORD
+
+        else:
+            context.bot.send_message(
+                chat_id=update.message.chat_id,
+                text='Введите вашу электронную почту:'
+            )
+            return LOGIN_EMAIL
 
 
 dp.add_handler(

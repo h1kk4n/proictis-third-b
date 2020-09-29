@@ -1,4 +1,5 @@
 import json
+import requests
 import gspread
 
 from sqlalchemy.orm import sessionmaker
@@ -93,7 +94,10 @@ def fill_teams(project_id):
                 members = []
                 for j in range(1, 9):
                     member = values[i + j][col]
-                    members.append(member)
+                    if member != 'x':
+                        members.append(member)
+                    else:
+                        members.append(None)
 
                 team = Team(
                     name=team_name,
@@ -112,17 +116,98 @@ def fill_teams(project_id):
         session.close()
 
 
+def fill_teams_and_projects(projects_list, project_table_class):
+    session = Session()
+
+    for i in range(len(projects_list)):
+        project_id = 0
+        print(i)
+        mentor = projects_list[i]
+        mentor_name = mentor['name']
+        additional_info = mentor['contacts']
+        for k in range(len(mentor['themes'])):
+            theme = mentor['themes'][k]
+            project_name = theme['name']
+            case = theme['documentLink'] or None
+            teams = [
+                theme['teams'][0]['name'] or None,
+                theme['teams'][1]['name'] or None,
+                theme['teams'][2]['name'] or None
+            ]
+
+            for j in range(len(teams)):
+                if teams[j]:
+                    members = theme['teams'][j]['members']
+                    team = Team(
+                        name=teams[j],
+                        member_1=members[0],
+                        member_2=members[1],
+                        member_3=members[2],
+                        member_4=members[3],
+                        member_5=members[4],
+                        member_6=members[5],
+                        member_7=members[6],
+                        member_8=members[7]
+                    )
+                    session.add(team)
+
+            project = project_table_class(
+                id=project_id,
+                mentor=mentor_name,
+                name=project_name,
+                additional_info=additional_info,
+                case=case,
+                team_1=teams[0],
+                team_2=teams[1],
+                team_3=teams[2]
+            )
+
+            session.add(project)
+            project_id += 1
+
+    session.commit()
+    session.close()
+
+
+def make_teams_and_projects():
+    try:
+        projects_sheet = requests.get(Config.BASE_URL + Config.url_path['sheets']).json()
+        projects_sheet.raise_for_status()
+
+        first_project = projects_sheet[0]['structure']['mentors']
+        second_project = projects_sheet[1]['structure']['mentors']
+
+    except:
+        try:
+            projects_info = requests.get(Config.BASE_URL + Config.url_path['projects']).json()
+
+            first_project_id = projects_info[0]['link'].split('/')[-2]
+            second_project_id = projects_info[1]['link'].split('/')[-2]
+
+            fill_projects(first_project_id, FirstProject)
+            fill_projects(second_project_id, SecondProject)
+            fill_teams(first_project_id)
+            fill_teams(second_project_id)
+            return "Дело сделано, но не так, как планировалось"
+
+        except:
+            return "Что-то пошло не так"
+
+    else:
+
+        fill_teams_and_projects(first_project, FirstProject)
+        fill_teams_and_projects(second_project, SecondProject)
+        return "Дело сделано"
+
+
 def fully_refill_database():
     recreate_database()
-    fill_projects('1bzRdpJMghpo0fvUtd5CInKh96tdSikiAdg9fnK3nLLs', FirstProject)
-    fill_teams('1bzRdpJMghpo0fvUtd5CInKh96tdSikiAdg9fnK3nLLs')
-
-    fill_projects('1aPFMDFrQWk6tJn-EMHUTI-CpBNYN2n92jSuf8VHPgOg', SecondProject)
-    fill_teams('1aPFMDFrQWk6tJn-EMHUTI-CpBNYN2n92jSuf8VHPgOg')
+    return make_teams_and_projects()
 
 
 if __name__ == '__main__':
 
-    # print(Base.metadata.tables['teams'].create(bind=engine))
+    # Base.metadata.tables['users'].drop(bind=engine)
+    # Base.metadata.tables['users'].create(bind=engine)
 
-    fully_refill_database()
+    print(fully_refill_database())

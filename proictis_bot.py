@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 if __name__ == '__main__':
     updater.bot.send_message(
         chat_id=298424246,
-        text='Бот включен'
+        text='Бот включен. Привет, <a href="tg://user?id=298424246">немолодой</a>'
     )
 
     updater.start_webhook(

@@ -32,6 +32,7 @@ class Config:
         'contacts': '/about',
         'mentors': '/api/mentors',
         'projects': '/api/projects',
+        'sheets': '/api/projects/sheets',
         'news': '/api/news',
         'competitions': '/api/competitions',
         'achievements': '/api/achievements',

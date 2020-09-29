@@ -17,9 +17,35 @@ from app import dp
 from config import Config
 
 
+schedule_buttons = {
+    'choice': 'schedule_choice',
+    'back': 'schedule_back',
+    'forward': 'schedule_forward',
+    'week': 'schedule_week',
+    'day': 'schedule_day',
+    'all': 'schedule_all',
+    'end': 'schedule_end'
+}
+
+
 class ScheduleException(BaseException):
-    def __init__(self, error_text='Что-то пошло не так при выводе расписания'):
-        self.text = error_text
+    def __init__(self):
+        pass
+
+
+class ChoicesException(ScheduleException):
+    def __init__(self, choices_schedule):
+        self.choices_schedule = choices_schedule['choices']
+
+
+class NoEntriesException(ScheduleException):
+    def __init__(self):
+        self.text = 'По вашему запросу ничего не найдено'
+
+
+class WentWrongException(ScheduleException):
+    def __init__(self):
+        self.text = 'Что-то пошло не так при выводе расписания'
 
 
 schedule_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'groups')
@@ -65,13 +91,13 @@ def get_schedule(request_data, week_num=None):
             return response
 
         elif response.get('result', False) == 'no_entries':
-            raise ScheduleException('По вашему запросу ничего не найдено')
+            raise NoEntriesException
 
         elif response.get('choices', False):
-            raise ScheduleException
+            raise ChoicesException(response)
 
         else:
-            raise ScheduleException
+            raise WentWrongException
 
     except requests.RequestException:
         group_dir = os.path.join(schedule_dir, request_data)
@@ -95,7 +121,32 @@ def make_group_schedule(update, context, group_query, weekday_query=0, week_num=
     try:
         schedule = get_schedule(group_query, week_num)
 
-    except ScheduleException as e:
+    except ChoicesException as e:
+        schedule = e.choices_schedule
+
+        bot_message = 'Возможно вы имели в виду:'
+
+        keyboard_markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(
+                text=f"{group['name']}",
+                callback_data=f"{schedule_buttons['choice']}: {group['name']}"
+
+            )] for group in schedule
+        ])
+
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text=bot_message,
+            reply_markup=keyboard_markup
+        )
+
+    except NoEntriesException as e:
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text=e.text
+        )
+
+    except WentWrongException as e:
         context.bot.send_message(
             chat_id=update.message.chat_id,
             text=e.text
@@ -110,13 +161,22 @@ def make_group_schedule(update, context, group_query, weekday_query=0, week_num=
         keyboard_markup = InlineKeyboardMarkup(
             [
                 [
-                    InlineKeyboardButton(text='<-', callback_data=f'schedule_back: {group} {week} {weekday_query}'),
-                    InlineKeyboardButton(text='Текущая неделя', callback_data=f'schedule_week: {group} {week}'),
-                    InlineKeyboardButton(text='->', callback_data=f'schedule_forward {group} {week} {weekday_query}')
+                    InlineKeyboardButton(
+                        text='<-',
+                        callback_data=f'{schedule_buttons["back"]}: {group} {week} {weekday_query}'
+                    ),
+                    InlineKeyboardButton(
+                        text='Текущая неделя',
+                        callback_data=f'{schedule_buttons["week"]}: {group} {week}'
+                    ),
+                    InlineKeyboardButton(
+                        text='->',
+                        callback_data=f'{schedule_buttons["forward"]}: {group} {week} {weekday_query}'
+                    )
                 ],
                 [
-                    InlineKeyboardButton(text='Все недели', callback_data=f'schedule_all: { group }'),
-                    InlineKeyboardButton(text='Закончить', callback_data='schedule_end')
+                    InlineKeyboardButton(text='Все недели', callback_data=f'{schedule_buttons["all"]}: { group }'),
+                    InlineKeyboardButton(text='Закончить', callback_data=f'{schedule_buttons["end"]}')
                 ]
             ]
         )
@@ -131,7 +191,7 @@ def make_group_schedule(update, context, group_query, weekday_query=0, week_num=
             else:
                 context.bot.edit_message_text(
                     chat_id=query.message.chat_id,
-                    messsage_id=query.message.message_id,
+                    message_id=query.message.message_id,
                     text='Воскресенье, поздравляю, пар нет)',
                     reply_markup=keyboard_markup
                 )
@@ -193,6 +253,16 @@ def make_group_schedule(update, context, group_query, weekday_query=0, week_num=
                     )
 
 
+def choose_schedule_group(update, context):
+    week_day = datetime.datetime.weekday(datetime.datetime.now(pytz.timezone('Europe/Moscow')))
+
+    query = update.callback_query
+
+    group = query.data.replace(f'{schedule_buttons["choice"]}: ', '')
+
+    make_group_schedule(update, context, group, week_day)
+
+
 def show_schedule(update, context):
     week_day = datetime.datetime.weekday(datetime.datetime.now(pytz.timezone('Europe/Moscow')))
 
@@ -223,8 +293,8 @@ def show_schedule(update, context):
 def change_day_schedule(update, context, week_day):
     query = update.callback_query
 
-    group_query = query.data.split()[1]
-    week = int(query.data.split()[2])
+    group_query = query.data.split()[1:-2]
+    week = int(query.data.split()[-2])
 
     make_group_schedule(update, context, group_query, week_day, week)
 
@@ -232,7 +302,7 @@ def change_day_schedule(update, context, week_day):
 def schedule_back(update, context):
     query = update.callback_query
 
-    week_day = int(query.data.split()[3]) - 1
+    week_day = int(query.data.split()[-1]) - 1
     change_day_schedule(update, context, week_day)
 
 
@@ -240,7 +310,7 @@ def schedule_back(update, context):
 def schedule_forward(update, context):
     query = update.callback_query
 
-    week_day = int(query.data.split()[3]) + 1
+    week_day = int(query.data.split()[-1]) + 1
     change_day_schedule(update, context, week_day)
 
 
@@ -266,13 +336,12 @@ def schedule_weekdays(update, context):
 
     week_keyboard = []
 
-    for i in range(2, 8
-                   ):
+    for i in range(2, 8):
         week_keyboard.append(
-            [InlineKeyboardButton(
-                text=schedule['table']['table'][i][0],
-                callback_data=f"schedule_day: {schedule['table']['name']} {schedule['table']['week']} {i - 2}"
-            )]
+          [InlineKeyboardButton(
+            text=schedule['table']['table'][i][0],
+            callback_data=f"{schedule_buttons['day']}: {schedule['table']['name']} {schedule['table']['week']} {i - 2}"
+          )]
         )
 
     context.bot.edit_message_text(
@@ -289,8 +358,8 @@ def schedule_from_week(update, context):
     data = query.data.split()
 
     group = data[1]
-    week = int(data[2])
-    weekday = int(data[3])
+    week = int(data[-2])
+    weekday = int(data[-1])
 
     make_group_schedule(update, context, group, weekday, week)
 
@@ -309,7 +378,7 @@ def show_all_schedule_weeks(update, context):
         [
             [InlineKeyboardButton(
                 text=f'Неделя {week_num}',
-                callback_data=f'schedule_week: {group} {week_num}'
+                callback_data=f'{schedule_buttons["week"]}: {group} {week_num}'
             )] for week_num in schedule['weeks']
         ]
     )
@@ -333,12 +402,13 @@ def schedule_end(update, context):
     )
 
 
-dp.add_handler(CallbackQueryHandler(pattern='schedule_back', callback=schedule_back))
-dp.add_handler(CallbackQueryHandler(pattern='schedule_forward', callback=schedule_forward))
-dp.add_handler(CallbackQueryHandler(pattern='schedule_week', callback=schedule_weekdays))
-dp.add_handler(CallbackQueryHandler(pattern='schedule_day', callback=schedule_from_week))
-dp.add_handler(CallbackQueryHandler(pattern='schedule_all', callback=show_all_schedule_weeks))
-dp.add_handler(CallbackQueryHandler(pattern='schedule_end', callback=schedule_end))
+dp.add_handler(CallbackQueryHandler(pattern=schedule_buttons["choice"], callback=choose_schedule_group))
+dp.add_handler(CallbackQueryHandler(pattern=schedule_buttons["back"], callback=schedule_back))
+dp.add_handler(CallbackQueryHandler(pattern=schedule_buttons["forward"], callback=schedule_forward))
+dp.add_handler(CallbackQueryHandler(pattern=schedule_buttons["week"], callback=schedule_weekdays))
+dp.add_handler(CallbackQueryHandler(pattern=schedule_buttons["day"], callback=schedule_from_week))
+dp.add_handler(CallbackQueryHandler(pattern=schedule_buttons["all"], callback=show_all_schedule_weeks))
+dp.add_handler(CallbackQueryHandler(pattern=schedule_buttons["end"], callback=schedule_end))
 
 dp.add_handler(
     ConversationHandler(

@@ -70,3 +70,30 @@ class Team(Base):
                f"-{ self.member_8 or 'x' }"
 
 
+class User(Base):
+    __tablename__ = 'users'
+    tg_chat_id = Column(Integer, primary_key=True)
+    role = Column(String)
+    surname = Column(String)
+    name = Column(String)
+    patronymic = Column(String)
+    group = Column(String)
+    post = Column(String)
+    directions = Column(String)
+    email = Column(String)
+    phone = Column(String)
+
+    def __repr__(self):
+        if self.role == 'student':
+            return f"<b><i>{self.surname} {self.name} {self.patronymic}</i></b>\n\n" \
+                   f"<u>Роль</u>: студент\n" \
+                   f"<u>Группа</u>: {self.group}\n" \
+                   f"<u>Почта</u>: {self.email}\n" \
+                   f"<u>Телефон</u>: {self.phone}"
+        if self.role == 'mentor':
+            return f"<b><i>{self.surname} {self.name} {self.patronymic}</i><b/>\n\n" \
+                   f"<u>Роль</u>: наставник\n" \
+                   f"<u>Должность</u>: {self.post}\n" \
+                   f"<u>Направления</u>: {self.directions}\n" \
+                   f"<u>Почта</u>: {self.email}\n" \
+                   f"<u>Телефон</u>: {self.phone}"

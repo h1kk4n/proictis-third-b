@@ -84,11 +84,11 @@ def find_mentor(update, context):
     for mentor in mentors_json:
         if mentor_id == mentor['_id']:
             founded_mentor = mentor
-            bot_message = f"{ mentor['surname'] } { mentor['name'] } { mentor['patronymic'] }\n\n" \
+            bot_message = f"<b><i>{ mentor['surname'] } { mentor['name'] } { mentor['patronymic'] }</i></b>\n\n" \
                           f"<u>Почта</u>: { mentor['email'] }\n" \
                           f"<u>Телефон</u>: { mentor['phone'] }\n" \
                           f"<u>Должность</u>: { mentor['post'] }\n" \
-                          f"<u>Направление</u>: { mentor['directions'] }\n" \
+                          f"<u>Направления</u>: { mentor['directions'] }\n" \
                           f"\n<i>Источник</i>: { mentors_url.replace('/api', '') }"
 
     # deleting choice message
