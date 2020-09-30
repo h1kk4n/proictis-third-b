@@ -64,7 +64,8 @@ def do_login_auth(update, context):
                 email=user_info['email'],
                 phone=user_info['phone'],
                 post=user_info['post'],
-                directions=user_info['directions']
+                directions=user_info['directions'],
+                is_admin=False
             )
 
         else:

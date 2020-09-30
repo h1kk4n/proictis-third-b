@@ -23,12 +23,21 @@ engine = create_engine(Config.DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 
-def recreate_database():
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+def recreate_teams_and_projects_db():
+    Base.metadata.tables['teams'].drop(bind=engine)
+    Base.metadata.tables['teams'].create(bind=engine)
+    Base.metadata.tables['first_project'].drop(bind=engine)
+    Base.metadata.tables['first_project'].create(bind=engine)
+    Base.metadata.tables['second_project'].drop(bind=engine)
+    Base.metadata.tables['second_project'].create(bind=engine)
 
 
-def fill_projects(project_id, table_class):
+def drop_users_table():
+    Base.metadata.tables['users'].drop(bind=engine)
+    Base.metadata.tables['users'].create(bind=engine)
+
+
+def fill_projects_and_teams_from_spreadsheet(project_id, table_class):
     session = Session()
 
     worksheet = service.open_by_key(project_id).worksheet('Сводная таблица')
@@ -42,16 +51,17 @@ def fill_projects(project_id, table_class):
 
     for col in range(1, len(values[0])):
         mentor = values[0][col]
+        additional_info = values[3][col].strip()
         if not mentor:
             i = col
             while not mentor and i > 0:
                 mentor = worksheet.cell(3, i).value
+                additional_info = worksheet.cell(6, i).value
                 i -= 1
 
-        case = values[1][col].strip()
-        project_name = values[2][col].strip()
+        project_name = values[2][col].strip().replace('\n', '')
 
-        additional_info = values[4][col].strip()
+        description = values[4][col].strip()
 
         team_1 = values[5][col].strip()
         team_2 = values[14][col].strip()
@@ -61,7 +71,7 @@ def fill_projects(project_id, table_class):
             id=col,
             mentor=mentor,
             name=project_name,
-            case=case,
+            description=description,
             additional_info=additional_info,
             team_1=team_1,
             team_2=team_2,
@@ -69,24 +79,7 @@ def fill_projects(project_id, table_class):
         )
 
         session.add(project)
-    session.commit()
 
-    session.close()
-
-
-def fill_teams(project_id):
-    session = Session()
-
-    worksheet = service.open_by_key(project_id).worksheet('Сводная таблица')
-
-    values = worksheet.get_all_values()
-
-    # useless
-    del values[0]
-    # name isn't necessary
-    del values[0]
-
-    for col in range(1, len(values[0])):
         for i in 5, 14, 23:
 
             team_name = values[i][col]
@@ -94,7 +87,7 @@ def fill_teams(project_id):
                 members = []
                 for j in range(1, 9):
                     member = values[i + j][col]
-                    if member.strip().lower() != 'x' and member.strip().lower():
+                    if member.strip().lower() != 'x' and member.strip().lower() != 'х' and member.strip().lower():
                         members.append(member)
                     else:
                         members.append(None)
@@ -112,8 +105,10 @@ def fill_teams(project_id):
                 )
 
                 session.add(team)
-        session.commit()
-        session.close()
+
+    session.commit()
+
+    session.close()
 
 
 def fill_teams_and_projects(projects_list, project_table_class):
@@ -126,7 +121,7 @@ def fill_teams_and_projects(projects_list, project_table_class):
         mentor_name = mentor['name']
         additional_info = mentor['contacts']
         for k in range(len(mentor['themes'])):
-            theme = mentor['themes'][k]
+            theme = mentor['themes'][k].replace('\n', '').strip()
             project_name = theme['name']
             case = theme['documentLink'] or None
             teams = [
@@ -134,6 +129,19 @@ def fill_teams_and_projects(projects_list, project_table_class):
                 theme['teams'][1]['name'] or None,
                 theme['teams'][2]['name'] or None
             ]
+
+            project = project_table_class(
+                id=project_id,
+                mentor=mentor_name,
+                name=project_name,
+                additional_info=additional_info,
+                case=case,
+                team_1=teams[0],
+                team_2=teams[1],
+                team_3=teams[2]
+            )
+
+            session.add(project)
 
             for j in range(len(teams)):
                 if teams[j]:
@@ -151,18 +159,6 @@ def fill_teams_and_projects(projects_list, project_table_class):
                     )
                     session.add(team)
 
-            project = project_table_class(
-                id=project_id,
-                mentor=mentor_name,
-                name=project_name,
-                additional_info=additional_info,
-                case=case,
-                team_1=teams[0],
-                team_2=teams[1],
-                team_3=teams[2]
-            )
-
-            session.add(project)
             project_id += 1
 
     session.commit()
@@ -184,10 +180,8 @@ def make_teams_and_projects():
             first_project_id = projects_info[0]['link'].split('/')[-2]
             second_project_id = projects_info[1]['link'].split('/')[-2]
 
-            fill_projects(first_project_id, FirstProject)
-            fill_projects(second_project_id, SecondProject)
-            fill_teams(first_project_id)
-            fill_teams(second_project_id)
+            fill_projects_and_teams_from_spreadsheet(first_project_id, FirstProject)
+            fill_projects_and_teams_from_spreadsheet(second_project_id, SecondProject)
             return "Дело сделано, но не так, как планировалось"
 
         except:
@@ -200,14 +194,12 @@ def make_teams_and_projects():
         return "Дело сделано"
 
 
-def fully_refill_database():
-    recreate_database()
-    # return make_teams_and_projects()
+def fully_refill_projects_and_teams_database():
+    recreate_teams_and_projects_db()
+    return make_teams_and_projects()
 
 
 if __name__ == '__main__':
 
-    # Base.metadata.tables['users'].drop(bind=engine)
-    # Base.metadata.tables['users'].create(bind=engine)
-
-    print(fully_refill_database())
+    # print(fully_refill_projects_and_teams_database())
+    print(drop_users_table())

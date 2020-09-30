@@ -136,8 +136,8 @@ def find_team_info(team_name):
 
 
 def make_member_pattern(member):
-    member = ' '.join(member.replace(',', '').split()[0:2])
     if member:
+        member = ' '.join(member.replace(',', '').split()[0:2])
         return member
     else:
         return None

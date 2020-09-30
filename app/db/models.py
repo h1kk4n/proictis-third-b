@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 
 
 Base = declarative_base()
@@ -11,7 +11,7 @@ class FirstProject(Base):
     mentor = Column(String)
     name = Column(String)
     additional_info = Column(String)
-    case = Column(String)
+    description = Column(String)
     team_1 = Column(String)
     team_2 = Column(String)
     team_3 = Column(String)
@@ -31,7 +31,7 @@ class SecondProject(Base):
     mentor = Column(String)
     name = Column(String)
     additional_info = Column(String)
-    case = Column(String)
+    description = Column(String)
     team_1 = Column(String)
     team_2 = Column(String)
     team_3 = Column(String)
@@ -82,16 +82,17 @@ class User(Base):
     directions = Column(String)
     email = Column(String)
     phone = Column(String)
+    is_admin = Column(Boolean)
 
     def __repr__(self):
         if self.role == 'student':
-            return f"<b><i>{self.surname} {self.name} {self.patronymic}</i></b>\n\n" \
+            return f"Вы <b><i>{self.surname} {self.name} {self.patronymic}</i></b>\n\n" \
                    f"<u>Роль</u>: студент\n" \
                    f"<u>Группа</u>: {self.group}\n" \
                    f"<u>Почта</u>: {self.email}\n" \
                    f"<u>Телефон</u>: {self.phone}"
         if self.role == 'mentor':
-            return f"<b><i>{self.surname} {self.name} {self.patronymic}</i><b/>\n\n" \
+            return f"Вы <b><i>{self.surname} {self.name} {self.patronymic}</i><b/>\n\n" \
                    f"<u>Роль</u>: наставник\n" \
                    f"<u>Должность</u>: {self.post}\n" \
                    f"<u>Направления</u>: {self.directions}\n" \
