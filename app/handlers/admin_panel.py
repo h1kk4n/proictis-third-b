@@ -17,14 +17,21 @@ def is_owner(update):
     return Config.OWNER_TG_ID == update.message.chat_id
 
 
-def check_admin_status(update):
+def check_admin_status(update, context):
     session = Session()
 
     user_stats = session.query(User).filter(User.tg_chat_id == update.message.chat_id).first()
 
     session.close()
 
-    return user_stats.is_admin or is_owner(update)
+    if user_stats:
+        return user_stats.is_admin or is_owner(update)
+
+    else:
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text='У вас нет таких прав. Вы не авторизованы'
+        )
 
 
 def not_enough_permission(update, context):
