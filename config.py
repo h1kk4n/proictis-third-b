@@ -11,7 +11,7 @@ if os.path.exists(env_path):
 class Config:
     TOKEN = os.environ.get("BOT_TOKEN", None)
 
-    OWNER_TG_ID = os.environ.get("OWNER_TG_ID", None)
+    OWNER_TG_ID = int(os.environ.get("OWNER_TG_ID", None))
 
     PORT = int(os.environ.get('PORT', 5000))
 

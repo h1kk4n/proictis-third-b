@@ -45,7 +45,7 @@ def not_enough_permission(update, context):
 def add_admin_info(update, context):
 
     if check_admin_status(update, context):
-        bot_message = 'Введите chat_id нового администратора в телеграме. Идентификатор часа можно получить ' \
+        bot_message = 'Введите chat_id нового администратора в телеграме. Идентификатор чата можно получить ' \
                       'написав боту @userinfobot'
         context.bot.send_message(
             chat_id=update.message.chat_id,
