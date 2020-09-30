@@ -94,7 +94,7 @@ def fill_teams(project_id):
                 members = []
                 for j in range(1, 9):
                     member = values[i + j][col]
-                    if member != 'x':
+                    if member.strip().lower() != 'x' and member.strip().lower():
                         members.append(member)
                     else:
                         members.append(None)
@@ -202,7 +202,7 @@ def make_teams_and_projects():
 
 def fully_refill_database():
     recreate_database()
-    return make_teams_and_projects()
+    # return make_teams_and_projects()
 
 
 if __name__ == '__main__':

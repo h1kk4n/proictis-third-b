@@ -174,7 +174,7 @@ def make_project_team_info_with_keyboard(request_data, callback_data):
     keyboard = []
 
     for i in range(8):
-        if members[i] is not None:
+        if members[i] is not None and members[i].strip().lower() != 'x':
             keyboard.append(
                 [InlineKeyboardButton(
                     text=founded_members[i],

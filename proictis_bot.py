@@ -14,13 +14,13 @@ if __name__ == '__main__':
         text='Бот включен. Привет, <a href="tg://user?id=298424246">немолодой</a>'
     )
 
-    updater.start_webhook(
+    '''updater.start_webhook(
         listen='0.0.0.0',
         port=int(Config.PORT),
         url_path=Config.TOKEN
     )
-    updater.bot.setWebhook('https://warm-headland-36871.herokuapp.com/'+Config.TOKEN)
+    updater.bot.set_webhook('https://warm-headland-36871.herokuapp.com/'+Config.TOKEN)'''
 
-    # updater.start_polling()
+    updater.start_polling()
 
     updater.idle()
