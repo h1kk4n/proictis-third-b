@@ -2,8 +2,10 @@ from telegram.ext import CommandHandler
 from telegram.ext import ConversationHandler
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
+import requests
 
 from app import dp
+from config import Config
 
 
 REG_ROLE, REG_NAME, REG_PATRONYMIC, REG_SURNAME, REG_GROUP, REG_POST, REG_DIRECTIONS, \
@@ -174,7 +176,22 @@ def register_pass(update, context):
             text='Пароль слишком короткий. Минимальная длина - 8 символов. Попробуйте еще раз'
         )
         return REG_PASS
-    # ...
+
+    register_result = complete_registration(context)
+
+    bot_message = ''
+    if register_result:
+        bot_message = 'Регистрация прошла успешно. Вам на почту было отправлено письмо для подтверждения аккаунта.' \
+                      'Для того, чтобы авторизоваться, используйте команду /login'
+    else:
+        bot_message = 'В процессе регистрации возникла ошибка. Возможно, какие-то данные некорректны, либо на сайте' \
+                      'проводятся технические работы. Попробуйте позже'
+
+    context.bot.send_message(
+        chat_id=update.message.chat_id,
+        text=bot_message
+    )
+    return ConversationHandler.END
 
 
 def complete_registration(context):
@@ -208,7 +225,23 @@ def complete_registration(context):
         user_data['post'] = post
         user_data['directions'] = directions
 
-    # ...
+    register_result = requests.post(
+        Config.BASE_URL + Config.url_path['register'],
+        data=user_data
+    ).json()
+
+    context.user_data.pop('role', None)
+    context.user_data.pop('name', None)
+    context.user_data.pop('patronymic', None)
+    context.user_data.pop('surname', None)
+    context.user_data.pop('phone', None)
+    context.user_data.pop('group', None)
+    context.user_data.pop('email', None)
+    context.user_data.pop('post', None)
+    context.user_data.pop('directions', None)
+    context.user_data.pop('password', None)
+
+    return register_result['ok']
 
 
 def stop_register(update, context):

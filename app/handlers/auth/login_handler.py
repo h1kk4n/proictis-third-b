@@ -4,10 +4,6 @@ from telegram.ext import MessageHandler
 from telegram.ext import Filters
 import requests
 
-from pprint import pprint
-
-from sqlalchemy.exc import IntegrityError
-
 from app import dp
 from app.db.models import User
 from app.db.db import Session
@@ -42,8 +38,6 @@ def do_login_auth(update, context):
     if login_result['auth']:
         session = Session()
         user_info = login_result['user']
-
-        user = ''
 
         if user_info['role'] == 'student':
             user = User(
@@ -96,13 +90,13 @@ def do_login_auth(update, context):
             if 'message' == "User didn't activated account.":
                 context.bot.sendMessage(
                     chat_id=update.message.chat_id,
-                    text="Вы не активировали свой аккаунт Проектного Офиса ИКТИБ."
+                    text="Вы не активировали свой аккаунт Проектного Офиса ИКТИБ"
                 )
 
         else:
             context.bot.sendMessage(
                 chat_id=update.message.chat_id,
-                text="Что-то пошло не так, попробуйте еще раз или позже."
+                text="Что-то пошло не так, попробуйте еще раз или позже"
             )
 
     del context.user_data['email']
@@ -134,7 +128,7 @@ def do_login(update, context):
 
         context.bot.send_message(
             chat_id=update.message.chat_id,
-            text=f"Здравствуйте, {user.name} {user.patronymic}. Вы авторизованы."
+            text=f"Вы уже авторизованы, {user.name} {user.patronymic}"
         )
         session.close()
 
@@ -180,6 +174,22 @@ def do_login(update, context):
             return LOGIN_EMAIL
 
 
+def do_logout(update, context):
+    session = Session()
+
+    user = session.query(User).filter(User.tg_chat_id == update.message.chat_id).first()
+
+    session.delete(user)
+    session.commit()
+
+    context.bot.send_message(
+        chat_id=update.message.chat_id,
+        text='Вы вышли из сети. Теперь вы для нас загадка'
+    )
+
+    session.close()
+
+
 dp.add_handler(
     ConversationHandler(
         entry_points=[
@@ -192,4 +202,4 @@ dp.add_handler(
         fallbacks=[]
     )
 )
-
+dp.add_handler(CommandHandler(command='logout', callback=do_logout))
