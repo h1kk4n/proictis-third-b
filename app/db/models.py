@@ -47,7 +47,8 @@ class SecondProject(Base):
 
 class Team(Base):
     __tablename__ = 'teams'
-    name = Column(String, primary_key=True)
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
     member_1 = Column(String)
     member_2 = Column(String)
     member_3 = Column(String)

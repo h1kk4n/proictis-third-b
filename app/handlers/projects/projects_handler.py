@@ -12,19 +12,20 @@ project_buttons = {
     'choose': 'choose_project_type',
     'first': {
         'show': 'show_first_project',
-        'themes_end': 'first_project_themes_for_end',
-        'info': 'first_project_info',
-        'end_info': 'first_projects_end_info',
-        'team_info': 'first_projects_team_info'
+        'themes_end': 'fp_themes_for_end',
+        'info': 'fp_info',
+        'end_info': 'fp_end_info',
+        'team_info': 'fp_team_info'
     },
     'second': {
         'show': 'show_second_project',
-        'themes_end': 'second_project_themes_for_end',
-        'info': 'second_project_info',
-        'end_info': 'second_projects_end_info',
-        'team_info': 'second_projects_team_info'
+        'themes_end': 'sp_themes_for_end',
+        'info': 'sp_info',
+        'end_info': 'sp_end_info',
+        'team_info': 'sp_team_info'
     },
-    'student': 'user',
+    'student': 'u',
+    'team_end': 'team_end',
     'end': 'project_end'
 }
 
@@ -126,10 +127,13 @@ def make_project_themes_keyboard(project_table_class, callback_data):
     return InlineKeyboardMarkup(projects_keyboard)
 
 
-def find_team_info(team_name):
+def find_team_info(team_name='', team_id=None):
     session = Session()
 
-    query_result = session.query(Team).filter(Team.name == team_name).first()
+    if team_id is None:
+        query_result = session.query(Team).filter(team_name == Team.name).first()
+    else:
+        query_result = session.query(Team).filter(team_id == Team.id).first()
 
     session.close()
     return query_result
@@ -137,56 +141,84 @@ def find_team_info(team_name):
 
 def make_member_pattern(member):
     if member:
-        member = ' '.join(member.replace(',', '').split()[0:2])
+        member = member.replace(',', '').split()
+        member = f"{member[0]} {member[1]}"
         return member
     else:
         return None
 
 
 def make_project_team_info_with_keyboard(request_data, callback_data):
-    team_name = ' '.join(request_data.split()[1:])
-    project_number = request_data.split()[0]
+    founded_team = None
+    try:
+        team_id = int(request_data.split()[1])
+        founded_team = find_team_info(team_id=team_id)
+    except:
+        team_name = ' '.join(request_data.split()[1:])
+        founded_team = find_team_info(team_name=team_name)
+    finally:
+        project_number = request_data.split()[0]
 
-    founded_team = find_team_info(team_name)
+        team_id = founded_team.id
 
-    founded_members = [
-        founded_team.member_1,
-        founded_team.member_2,
-        founded_team.member_3,
-        founded_team.member_4,
-        founded_team.member_5,
-        founded_team.member_6,
-        founded_team.member_7,
-        founded_team.member_8,
-    ]
+        founded_members = [
+            founded_team.member_1,
+            founded_team.member_2,
+            founded_team.member_3,
+            founded_team.member_4,
+            founded_team.member_5,
+            founded_team.member_6,
+            founded_team.member_7,
+            founded_team.member_8,
+        ]
 
-    members = [
-        make_member_pattern(founded_team.member_1),
-        make_member_pattern(founded_team.member_2),
-        make_member_pattern(founded_team.member_3),
-        make_member_pattern(founded_team.member_4),
-        make_member_pattern(founded_team.member_5),
-        make_member_pattern(founded_team.member_6),
-        make_member_pattern(founded_team.member_7),
-        make_member_pattern(founded_team.member_8)
-    ]
+        members = [
+            make_member_pattern(founded_team.member_1),
+            make_member_pattern(founded_team.member_2),
+            make_member_pattern(founded_team.member_3),
+            make_member_pattern(founded_team.member_4),
+            make_member_pattern(founded_team.member_5),
+            make_member_pattern(founded_team.member_6),
+            make_member_pattern(founded_team.member_7),
+            make_member_pattern(founded_team.member_8)
+        ]
 
-    keyboard = []
+        keyboard = []
 
-    for i in range(8):
-        if members[i] is not None and members[i].strip().lower() != 'x':
-            keyboard.append(
-                [InlineKeyboardButton(
-                    text=founded_members[i],
-                    callback_data=f"{project_buttons['student']}: {members[i]}"
-                )]
-            )
+        for i in range(8):
+            project = ''
+            if callback_data == 'fp':
+                project = 'f'
+            elif callback_data == 'sp':
+                project = 's'
 
-    keyboard.append(
-        [InlineKeyboardButton(text='Назад', callback_data=f'{callback_data}_info: {project_number}'),
-         InlineKeyboardButton(text='Закончить', callback_data='project_end')]
+            if members[i] is not None:
+                print(f"{project_buttons['student']}: {members[i]} {team_id} {project} {project_number}")
+                keyboard.append(
+                    [InlineKeyboardButton(
+                        text=founded_members[i],
+                        callback_data=f"{project_buttons['student']}: {members[i]} {team_id} {project} {project_number}"
+                    )]
+                )
+
+        keyboard.append(
+            [InlineKeyboardButton(text='Назад', callback_data=f'{callback_data}_info: {project_number}'),
+             InlineKeyboardButton(text='Закончить', callback_data=f'{project_buttons["team_end"]}: {team_id}')]
+        )
+        return founded_team, InlineKeyboardMarkup(keyboard)
+
+
+def team_end(update, context):
+    query = update.callback_query
+    data = query.data
+    team_id = int(data.replace(f"{project_buttons['team_end']}: ", ""))
+
+    team_info = str(find_team_info(team_id=team_id))
+
+    context.bot.send_message(
+        chat_id=query.message.chat_id,
+        text=team_info
     )
-    return founded_team, InlineKeyboardMarkup(keyboard)
 
 
 def projects_end(update, context):
@@ -227,7 +259,7 @@ def show_projects(update, context):
 
 # First creative project
 def first_projects_themes_buttons(update, context):
-    projects_keyboard = make_project_themes_keyboard(FirstProject, 'first_project')
+    projects_keyboard = make_project_themes_keyboard(FirstProject, 'fp')
 
     query = update.callback_query
     chat_id = query.message.chat_id
@@ -301,7 +333,7 @@ def first_project_team_info(update, context):
     query = update.callback_query
     request_data = query.data.replace(f'{project_buttons["first"]["team_info"]}: ', '')
 
-    team, keyboard = make_project_team_info_with_keyboard(request_data, 'first_project')
+    team, keyboard = make_project_team_info_with_keyboard(request_data, 'fp')
 
     bot_message = f"Команда <b><i>{ team.name }</i></b>\n\n" \
                   f"<b>Участники</b>:\n"
@@ -316,7 +348,7 @@ def first_project_team_info(update, context):
 
 # Second creative project
 def second_projects_themes_buttons(update, context):
-    projects_keyboard = make_project_themes_keyboard(SecondProject, 'second_project')
+    projects_keyboard = make_project_themes_keyboard(SecondProject, 'sp')
 
     query = update.callback_query
     chat_id = query.message.chat_id
@@ -388,7 +420,7 @@ def second_project_team_info(update, context):
 
     request_data = query.data.replace(f'{project_buttons["second"]["team_info"]}: ', '')
 
-    team, keyboard = make_project_team_info_with_keyboard(request_data, 'second_project')
+    team, keyboard = make_project_team_info_with_keyboard(request_data, 'sp')
 
     bot_message = f"Команда <b><i>{team.name}</i></b>\n\n" \
                   f"<b>Участники</b>:\n"
@@ -401,6 +433,7 @@ def second_project_team_info(update, context):
     )
 
 
+# Users usability
 def show_student_info(update, context):
     session = Session()
 
@@ -410,11 +443,41 @@ def show_student_info(update, context):
     surname = student[0]
     name = student[1]
 
+    team_id = int(student[2])
+    project = student[-2]
+    project_number = student[-1]
+
     user = session.query(User).filter(
         User.surname == surname,
         User.name == name,
         User.role == 'student'
     ).first()
+
+    keyboard = []
+
+    if project == 'f':
+        keyboard.append(
+            [InlineKeyboardButton(
+                text='Назад',
+                callback_data=f'{project_buttons["first"]["team_info"]}: {project_number} {team_id}'
+            )]
+        )
+    elif project == 's':
+        keyboard.append(
+            [InlineKeyboardButton(
+                text='Назад',
+                callback_data=f'{project_buttons["first"]["team_info"]}: {project_number} {team_id}'
+            )]
+        )
+
+    keyboard[-1].append(
+        InlineKeyboardButton(
+             text='Закончить',
+             callback_data=f'{project_buttons["end"]}'
+        )
+    )
+
+    keyboard = InlineKeyboardMarkup(keyboard)
 
     if user:
         bot_message = f"<b><i>{user.surname} {user.name} {user.patronymic}</i></b>\n\n" \
@@ -425,19 +488,21 @@ def show_student_info(update, context):
         context.bot.edit_message_text(
             chat_id=query.message.chat_id,
             message_id=query.message.message_id,
-            text=bot_message
+            text=bot_message,
+            reply_markup=keyboard
         )
 
     else:
-        student = ' '.join(student)
+        student = ' '.join(student[0:2])
 
-        bot_message = f"<b>{student}</b>\n\n" \
+        bot_message = f"Имя - <b>{student}</b>\n\n" \
                       f"У нас нет информации об этом студенте"
 
         context.bot.edit_message_text(
             chat_id=query.message.chat_id,
             message_id=query.message.message_id,
-            text=bot_message
+            text=bot_message,
+            reply_markup=keyboard
         )
 
     session.close()
@@ -469,6 +534,7 @@ dp.add_handler(CallbackQueryHandler(callback=second_project_team_info, pattern=p
 # User Info
 dp.add_handler(CallbackQueryHandler(callback=show_student_info, pattern=project_buttons['student']))
 
+dp.add_handler(CallbackQueryHandler(callback=team_end, pattern=project_buttons['team_end']))
 dp.add_handler(CallbackQueryHandler(callback=projects_end, pattern=project_buttons['end']))
 
 if __name__ == '__main__':

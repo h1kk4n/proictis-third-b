@@ -49,14 +49,16 @@ def fill_projects_and_teams_from_spreadsheet(project_id, table_class):
     # name isn't necessary
     del values[0]
 
+    teams_id = session.query(Team).count()
     for col in range(1, len(values[0])):
+
         mentor = values[0][col]
         additional_info = values[3][col].strip()
         if not mentor:
             i = col
             while not mentor and i > 0:
-                mentor = worksheet.cell(3, i).value
-                additional_info = worksheet.cell(6, i).value
+                mentor = worksheet.cell(3, i).value.strip().replace('\n', '')
+                additional_info = worksheet.cell(6, i).value.strip().replace('\n', '')
                 i -= 1
 
         project_name = values[2][col].strip().replace('\n', '')
@@ -93,6 +95,7 @@ def fill_projects_and_teams_from_spreadsheet(project_id, table_class):
                         members.append(None)
 
                 team = Team(
+                    id=teams_id,
                     name=team_name,
                     member_1=members[0],
                     member_2=members[1],
@@ -103,6 +106,7 @@ def fill_projects_and_teams_from_spreadsheet(project_id, table_class):
                     member_7=members[6],
                     member_8=members[7]
                 )
+                teams_id += 1
 
                 session.add(team)
 
@@ -114,20 +118,22 @@ def fill_projects_and_teams_from_spreadsheet(project_id, table_class):
 def fill_teams_and_projects(projects_list, project_table_class):
     session = Session()
 
+    project_id = session.query(project_table_class).count()
+    teams_id = session.query(Team).count()
+
     for i in range(len(projects_list)):
-        project_id = 0
         print(i)
         mentor = projects_list[i]
-        mentor_name = mentor['name']
-        additional_info = mentor['contacts']
+        mentor_name = mentor['name'].strip().replace('\n', '')
+        additional_info = mentor['contacts'].strip().replace('\n', '')
         for k in range(len(mentor['themes'])):
             theme = mentor['themes'][k].replace('\n', '').strip()
-            project_name = theme['name']
-            case = theme['documentLink'] or None
+            project_name = theme['name'].strip().replace('\n', '')
+            case = theme['documentLink'].strip().replace('\n', '') or None
             teams = [
-                theme['teams'][0]['name'] or None,
-                theme['teams'][1]['name'] or None,
-                theme['teams'][2]['name'] or None
+                theme['teams'][0]['name'].strip().replace('\n', '') or None,
+                theme['teams'][1]['name'].strip().replace('\n', '') or None,
+                theme['teams'][2]['name'].strip().replace('\n', '') or None
             ]
 
             project = project_table_class(
@@ -147,17 +153,20 @@ def fill_teams_and_projects(projects_list, project_table_class):
                 if teams[j]:
                     members = theme['teams'][j]['members']
                     team = Team(
+                        id=teams_id,
                         name=teams[j],
-                        member_1=members[0],
-                        member_2=members[1],
-                        member_3=members[2],
-                        member_4=members[3],
-                        member_5=members[4],
-                        member_6=members[5],
-                        member_7=members[6],
-                        member_8=members[7]
+                        member_1=members[0].strip(),
+                        member_2=members[1].strip(),
+                        member_3=members[2].strip(),
+                        member_4=members[3].strip(),
+                        member_5=members[4].strip(),
+                        member_6=members[5].strip(),
+                        member_7=members[6].strip(),
+                        member_8=members[7].strip()
                     )
                     session.add(team)
+
+                    teams_id += 1
 
             project_id += 1
 
@@ -174,7 +183,7 @@ def make_teams_and_projects():
         second_project = projects_sheet[1]['structure']['mentors']
 
     except:
-        try:
+        # try:
             projects_info = requests.get(Config.BASE_URL + Config.url_path['projects']).json()
 
             first_project_id = projects_info[0]['link'].split('/')[-2]
@@ -184,8 +193,8 @@ def make_teams_and_projects():
             fill_projects_and_teams_from_spreadsheet(second_project_id, SecondProject)
             return "Дело сделано, но не так, как планировалось"
 
-        except:
-            return "Что-то пошло не так"
+        # except:
+        #     return "Что-то пошло не так"
 
     else:
 
@@ -201,5 +210,5 @@ def fully_refill_projects_and_teams_database():
 
 if __name__ == '__main__':
 
-    # print(fully_refill_projects_and_teams_database())
-    print(drop_users_table())
+    print(fully_refill_projects_and_teams_database())
+    # print(drop_users_table())

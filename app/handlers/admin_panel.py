@@ -25,7 +25,7 @@ def check_admin_status(update, context):
     session.close()
 
     if user_stats:
-        return user_stats.is_admin or is_owner(update)
+        return is_owner(update) or user_stats.is_admin
 
     else:
         context.bot.send_message(
@@ -61,29 +61,41 @@ def add_admin_info(update, context):
 
 def add_admin(update, context):
     session = Session()
-    new_admin_id = update.message.text
+    try:
+        new_admin_id = int(update.message.text)
 
-    user = session.query(User).filter(User.tg_chat_id == new_admin_id).first()
+        user = session.query(User).filter(User.tg_chat_id == new_admin_id).first()
 
-    if user:
-        user.is_admin = True
-        session.commit()
-        session.close()
+        if user:
+            user.is_admin = True
+            bot_message = f"{user.surname} {user.name} теперь администратор чат-бота проектного офиса ИКТИБ"
 
-        bot_message = f"{user.surname} {user.name} теперь администратор чат-бота проектного офиса ИКТИБ"
+            context.bot.send_message(
+                chat_id=update.message.chat_id,
+                text=bot_message
+            )
+
+            session.commit()
+            session.close()
+
+        else:
+            bot_message = 'Такого пользователя нет в нашей базе. Либо введенные данные неверны, либо этот пользователь'\
+                          ' не авторизован. Во втором случае, попросите этого человека авторизоваться через /login'
+
+            context.bot.send_message(
+                chat_id=update.message.chat_id,
+                text=bot_message
+            )
+
+        return ConversationHandler.END
+
+    except ValueError:
+        bot_message = 'Пользовательский chat_id недействителен или неверен. Попробуйте ввести команду заново'
 
         context.bot.send_message(
             chat_id=update.message.chat_id,
             text=bot_message
         )
-
-    else:
-        context.bot.send_message(
-            chat_id=update.message.chat_id,
-            text='Такого пользователя нет в нашей базе. Попросите этого человека авторизоваться через /login'
-        )
-
-    return ConversationHandler.END
 
 
 # Remove admin status
@@ -106,15 +118,13 @@ def remove_admin_info(update, context):
 
 def remove_admin(update, context):
     session = Session()
-    new_admin_id = update.message.text
+    new_admin_id = int(update.message.text)
 
     user = session.query(User).filter(User.tg_chat_id == new_admin_id).first()
 
     if user:
         if user.is_admin:
             user.is_admin = False
-            session.commit()
-            session.close()
 
             bot_message = f"{user.surname} {user.name} больше не администратор чат-бота"
 
@@ -122,6 +132,9 @@ def remove_admin(update, context):
                 chat_id=update.message.chat_id,
                 text=bot_message
             )
+
+            session.commit()
+            session.close()
 
         else:
             context.bot.send_message(
