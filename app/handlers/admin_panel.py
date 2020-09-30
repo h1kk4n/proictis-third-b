@@ -140,7 +140,7 @@ def remove_admin(update, context):
 # Refill tables of first and second project also with teams
 def admin_db_refill(update, context):
 
-    if check_admin_status(update):
+    if check_admin_status(update, context):
         context.bot.send_message(
             chat_id=update.message.chat_id,
             text='Подождите немного, мы пересобираем таблицы в базе данных'
