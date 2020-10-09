@@ -14,6 +14,8 @@ from telegram import InlineKeyboardMarkup
 from pprint import pprint
 
 from app import dp
+from app.db.db import Session
+from app.db.models import User
 from config import Config
 
 
@@ -26,6 +28,11 @@ schedule_buttons = {
     'all': 'schedule_all',
     'end': 'schedule_end'
 }
+
+banned_lecture_list = [
+    'пр.Основы проектной деятельности Федотова А. Ю. И-241',
+    'пр.Основы проектной деятельности Эксакусто Т. В. И-241'
+]
 
 
 class ScheduleException(BaseException):
@@ -40,7 +47,7 @@ class ChoicesException(ScheduleException):
 
 class NoEntriesException(ScheduleException):
     def __init__(self):
-        self.text = 'По вашему запросу ничего не найдено'
+        self.text = 'По вашему запросу ничего не найдено (возможно, сервис лег)'
 
 
 class WentWrongException(ScheduleException):
@@ -99,10 +106,12 @@ def get_schedule(request_data, week_num=None):
         else:
             raise WentWrongException
 
-    except requests.RequestException:
+    except requests.exceptions.RequestException:
         group_dir = os.path.join(schedule_dir, request_data)
         week_files = sorted(os.listdir(group_dir))
-        week_file = os.path.join(group_dir, week_files[week_num - 1])
+        if not week_num:
+            week_num = len(week_files) - 1
+        week_file = os.path.join(group_dir, week_files[week_num])
 
         with open(week_file, 'r') as week_json_file:
             response = json.loads(week_json_file.read())
@@ -115,6 +124,27 @@ def find_group(update, context):
         chat_id=update.message.chat_id,
         text='Введите интересующую вас группу/аудиторию/преподавателя'
     )
+
+
+def make_schedule_message(schedule, group, week, nes_weekday, weekday_query):
+    bot_message = f"<b><i>Расписание {group}</i></b>\n" \
+                  f"<b>Неделя {week}</b>\n\n" \
+                  f"<b>Пары</b> ({nes_weekday}):\n\n"
+
+    week_schedule = ''
+    counter = schedule['table']['table'][0]
+    timer = schedule['table']['table'][1]
+    lectures = schedule['table']['table'][weekday_query + 2]
+    for i in range(1, len(schedule['table']['table'][0])):
+
+        lecture = lectures[i].replace('<', '').replace('>', '')
+        if lecture and lecture not in banned_lecture_list:
+            week_schedule += f"<b>{counter[i]}</b> ({timer[i]}): {lecture}\n\n"
+        else:
+            week_schedule += f"<b>{counter[i]}</b> ({timer[i]}): *отсутствует*\n\n"
+
+    bot_message += week_schedule
+    return bot_message
 
 
 def make_group_schedule(update, context, group_query, weekday_query=0, week_num=None):
@@ -199,20 +229,7 @@ def make_group_schedule(update, context, group_query, weekday_query=0, week_num=
         elif 0 <= weekday_query <= 5:
             nes_weekday = schedule['table']['table'][weekday_query + 2][0]
 
-            bot_message = f"<b><i>Расписание { group }</i></b>\n" \
-                          f"<b>Неделя { week }</b>\n\n" \
-                          f"<b>Пары</b> ({ nes_weekday }):\n\n"
-
-            week_schedule = ''
-            counter = schedule['table']['table'][0]
-            timer = schedule['table']['table'][1]
-            lectures = schedule['table']['table'][weekday_query + 2]
-            for i in range(1, len(schedule['table']['table'][0])):
-                lecture = lectures[i].replace('<', '').replace('>', '')
-
-                week_schedule += f"<b>{ counter[i] }</b> ({ timer[i] }): { lecture or ' <i>отсутствует</i>' }\n\n"
-
-            bot_message += week_schedule
+            bot_message = make_schedule_message(schedule, group, week, nes_weekday, weekday_query)
 
             if query is None:
                 context.bot.send_message(
@@ -254,7 +271,7 @@ def make_group_schedule(update, context, group_query, weekday_query=0, week_num=
 
 
 def choose_schedule_group(update, context):
-    week_day = datetime.datetime.weekday(datetime.datetime.now(pytz.timezone('Europe/Moscow')))
+    week_day = datetime.datetime.weekday(datetime.datetime.now(pytz.timezone('Etc/GMT-3')))
 
     query = update.callback_query
 
@@ -263,13 +280,16 @@ def choose_schedule_group(update, context):
     make_group_schedule(update, context, group, week_day)
 
 
-def show_schedule(update, context):
-    week_day = datetime.datetime.weekday(datetime.datetime.now(pytz.timezone('Europe/Moscow')))
+def show_schedule(update, context, job_queue):
+    week_day = datetime.datetime.weekday(datetime.datetime.now(pytz.timezone('Etc/GMT-3')))
 
-    if context.user_data.get('group', None):
-        group = context.user_data['group']
-        print(group)
-        make_group_schedule(update, context, group, week_day)
+    session = Session()
+    user = session.query(User).filter(User.tg_chat_id == update.message.chat_id).first()
+    if user:
+        group = user.group
+        if user.is_notified:
+            job_queue=None
+        make_group_schedule(update, context, group, week_day, job_queue=job_queue)
         return ConversationHandler.END
 
     elif len(context.args) == 0:
@@ -316,7 +336,7 @@ def schedule_forward(update, context):
 
 def schedule_group_founded(update, context):
     group_query = update.message.text
-    week_day = datetime.datetime.weekday(datetime.datetime.now(pytz.timezone('Europe/Moscow')))
+    week_day = datetime.datetime.weekday(datetime.datetime.now(pytz.timezone('Etc/GMT-3')))
 
     make_group_schedule(update, context, group_query, week_day)
     return ConversationHandler.END
@@ -412,7 +432,7 @@ dp.add_handler(CallbackQueryHandler(pattern=schedule_buttons["end"], callback=sc
 
 dp.add_handler(
     ConversationHandler(
-        entry_points=[CommandHandler(command='schedule', callback=show_schedule, pass_args=True)],
+        entry_points=[CommandHandler(command='schedule', callback=show_schedule, pass_args=True, pass_job_queue=True)],
         states={
             FIND_GROUP: [MessageHandler(filters=Filters.text, callback=schedule_group_founded)]
         },

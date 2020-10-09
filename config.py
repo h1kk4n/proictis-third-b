@@ -13,16 +13,10 @@ class Config:
 
     OWNER_TG_ID = int(os.environ.get("OWNER_TG_ID", None))
 
+    APP_URL = os.environ.get('APP_URL', None)
     PORT = int(os.environ.get('PORT', 5000))
 
-    # SQL_USER = os.environ.get("SQL_USER", None)
-    # SQL_PASS = os.environ.get("SQL_PASS", None)
-    # SQL_IP = os.environ.get("SQL_IP", None)
-    # SQL_PORT = os.environ.get("SQL_PORT", None)
-    # SQL_DB = os.environ.get("SQL_DB", None)
-    # DATABASE_URI = f'postgres+psycopg2://{SQL_USER}:{SQL_PASS}@{SQL_IP}:{SQL_PORT}/{SQL_DB}'
-
-    DATABASE_URL = os.environ.get('DATABASE_URL', None)
+    DATABASE_URL = os.environ.get('DATABASE_URL', None).replace('postres', 'postgres+psycopg2')
 
     GOOGLE_SERVICE_ACCOUNT = os.environ.get('GOOGLE_SERVICE_ACCOUNT', None)
 

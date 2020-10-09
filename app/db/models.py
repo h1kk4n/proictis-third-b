@@ -17,12 +17,14 @@ class FirstProject(Base):
     team_3 = Column(String)
 
     def __repr__(self):
-        return f"<b><i>{ self.name }</i></b>\n\n" \
-               f"<b>Наставник</b>: { self.mentor }\n\n" \
+        return f"<b><i>{self.name}</i></b>\n\n" \
+               f"<b>Наставник</b>: {self.mentor}\n\n" \
+               f"<u>Дополнительная информация</u>: {self.additional_info or '-'}\n" \
+               f"<u>Описание проекта</u>: <a href='{self.description  or '-'}'>ссылка на документ</a>\n" \
                f"<b>Команды</b>:\n" \
-               f"-{ self.team_1 or 'x' }\n" \
-               f"-{ self.team_2 or 'x' }\n" \
-               f"-{ self.team_3 or 'x' }"
+               f"-{self.team_1 or 'x'}\n" \
+               f"-{self.team_2 or 'x'}\n" \
+               f"-{self.team_3 or 'x'}"
 
 
 class SecondProject(Base):
@@ -84,6 +86,7 @@ class User(Base):
     email = Column(String)
     phone = Column(String)
     is_admin = Column(Boolean)
+    is_notified = Column(Boolean)
 
     def __repr__(self):
         if self.role == 'student':

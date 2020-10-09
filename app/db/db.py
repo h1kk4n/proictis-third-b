@@ -35,6 +35,7 @@ def recreate_teams_and_projects_db():
 def drop_users_table():
     Base.metadata.tables['users'].drop(bind=engine)
     Base.metadata.tables['users'].create(bind=engine)
+    return "Успешно"
 
 
 def fill_projects_and_teams_from_spreadsheet(project_id, table_class):
@@ -57,11 +58,11 @@ def fill_projects_and_teams_from_spreadsheet(project_id, table_class):
         if not mentor:
             i = col
             while not mentor and i > 0:
-                mentor = worksheet.cell(3, i).value.strip().replace('\n', '')
-                additional_info = worksheet.cell(6, i).value.strip().replace('\n', '')
+                mentor = worksheet.cell(3, i).value.strip().replace('\n', ' ')
+                additional_info = worksheet.cell(6, i).value.strip().replace('\n', ' ')
                 i -= 1
 
-        project_name = values[2][col].strip().replace('\n', '')
+        project_name = values[2][col].strip().replace('\n', ' ')
 
         description = values[4][col].strip()
 
@@ -124,16 +125,16 @@ def fill_teams_and_projects(projects_list, project_table_class):
     for i in range(len(projects_list)):
         print(i)
         mentor = projects_list[i]
-        mentor_name = mentor['name'].strip().replace('\n', '')
-        additional_info = mentor['contacts'].strip().replace('\n', '')
+        mentor_name = mentor['name'].strip().replace('\n', ' ')
+        additional_info = mentor['contacts'].strip().replace('\n', ' ')
         for k in range(len(mentor['themes'])):
-            theme = mentor['themes'][k].replace('\n', '').strip()
-            project_name = theme['name'].strip().replace('\n', '')
-            case = theme['documentLink'].strip().replace('\n', '') or None
+            theme = mentor['themes'][k].replace('\n', ' ').strip()
+            project_name = theme['name'].strip().replace('\n', ' ')
+            case = theme['documentLink'].strip().replace('\n', ' ') or None
             teams = [
-                theme['teams'][0]['name'].strip().replace('\n', '') or None,
-                theme['teams'][1]['name'].strip().replace('\n', '') or None,
-                theme['teams'][2]['name'].strip().replace('\n', '') or None
+                theme['teams'][0]['name'].strip().replace('\n', ' ') or None,
+                theme['teams'][1]['name'].strip().replace('\n', ' ') or None,
+                theme['teams'][2]['name'].strip().replace('\n', ' ') or None
             ]
 
             project = project_table_class(
@@ -210,5 +211,5 @@ def fully_refill_projects_and_teams_database():
 
 if __name__ == '__main__':
 
-    print(fully_refill_projects_and_teams_database())
-    # print(drop_users_table())
+    # print(fully_refill_projects_and_teams_database())
+    print(drop_users_table())

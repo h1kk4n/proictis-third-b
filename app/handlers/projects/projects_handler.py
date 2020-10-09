@@ -67,10 +67,13 @@ def make_project_info_with_keyboard(project_table_class, project_number):
     reply_keyboard = []
     query_result = session.query(project_table_class).filter(project_table_class.id == project_number).first()
 
-    bot_message = f"<b><i>{ query_result.name }</i></b>\n\n" \
-                  f"<b>Наставник</b>: { query_result.mentor }\n\n" \
-                  f"<b>Команды</b>:"
+    bot_message = f"<b><i>{query_result.name}</i></b>\n\n" \
+                  f"<b>Наставник</b>: {query_result.mentor}\n\n" \
+                  f"Дополнительная информация: {query_result.additional_info  or '-'}\n" \
+                  f"Описание проекта: <a href='{query_result.description or ''}'>ссылка на документ</a>"
 
+    if query_result.team_1 or query_result.team_2 or query_result.team_3:
+        bot_message += f"\n\n<b>Команды</b>:"
     if query_result.team_1:
         reply_keyboard.append(
             [InlineKeyboardButton(
@@ -236,8 +239,8 @@ def projects_end(update, context):
 # Choosing kind of projects
 def show_projects(update, context):
     reply_markup = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(text='Первый творческий проект', callback_data=f'{project_buttons["first"]["show"]}')],
-         [InlineKeyboardButton(text='Второй творческий проект', callback_data=f'{project_buttons["second"]["show"]}')]]
+        [[InlineKeyboardButton(text='Первый творческий проект', callback_data=project_buttons["first"]["show"])],
+         [InlineKeyboardButton(text='Второй творческий проект', callback_data=project_buttons["second"]["show"])]]
     )
 
     query = update.callback_query

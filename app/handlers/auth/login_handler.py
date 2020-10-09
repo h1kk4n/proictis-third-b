@@ -3,10 +3,13 @@ from telegram.ext import ConversationHandler
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
 import requests
+import datetime
+import pytz
 
 from app import dp
 from app.db.models import User
 from app.db.db import Session
+from app.handlers.schedule.notifications import schedule_notifications_job
 from config import Config
 
 
@@ -50,7 +53,9 @@ def do_login_auth(update, context):
                 email=user_info['email'],
                 phone=user_info['phone'],
                 post='',
-                directions=''
+                directions='',
+                is_notified=True,
+                is_admin=False
             )
 
         elif user_info['role'] == 'mentor':
@@ -65,7 +70,8 @@ def do_login_auth(update, context):
                 phone=user_info['phone'],
                 post=user_info['post'],
                 directions=user_info['directions'],
-                is_admin=False
+                is_admin=False,
+                is_notified=True
             )
 
         else:
@@ -74,6 +80,15 @@ def do_login_auth(update, context):
                 text="Что-то пошло не так в последнюю секунду"
             )
             return ConversationHandler.END
+
+        schedule_notifications_job(context, context.job_queue, user)
+        context.job_queue.run_daily(
+            schedule_notifications_job,
+            time=datetime.time(hour=1, minute=0, tzinfo=pytz.timezone('Etc/GMT-3')),
+            days=(0, 1, 2, 3, 4, 5),
+            context=user,
+            name='Обновить расписание'
+        )
 
         session.add(user)
         session.commit()
@@ -180,13 +195,20 @@ def do_logout(update, context):
 
     user = session.query(User).filter(User.tg_chat_id == update.message.chat_id).first()
 
-    session.delete(user)
-    session.commit()
+    if user:
+        session.delete(user)
+        session.commit()
 
-    context.bot.send_message(
-        chat_id=update.message.chat_id,
-        text='Вы вышли из сети. Теперь вы для нас загадка'
-    )
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text='Вы вышли из сети. Теперь вы для нас загадка'
+        )
+
+    else:
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text='Вы не авторизованы'
+        )
 
     session.close()
 
@@ -194,11 +216,11 @@ def do_logout(update, context):
 dp.add_handler(
     ConversationHandler(
         entry_points=[
-            CommandHandler(command='login', callback=do_login, pass_args=True)
+            CommandHandler(command='login', callback=do_login, pass_args=True, pass_job_queue=True)
         ],
         states={
-            LOGIN_EMAIL: [MessageHandler(filters=Filters.text, callback=do_login_email)],
-            LOGIN_PASSWORD: [MessageHandler(filters=Filters.text, callback=do_login_password)]
+            LOGIN_EMAIL: [MessageHandler(filters=Filters.text, callback=do_login_email, pass_job_queue=True)],
+            LOGIN_PASSWORD: [MessageHandler(filters=Filters.text, callback=do_login_password, pass_job_queue=True)]
         },
         fallbacks=[]
     )

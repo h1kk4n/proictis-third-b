@@ -4,7 +4,7 @@ from telegram.ext import MessageHandler
 from telegram.ext import Filters
 
 from app import dp
-from app.db.db import fully_refill_projects_and_teams_database
+from app.db.db import fully_refill_projects_and_teams_database, drop_users_table
 from app.db.db import Session
 from app.db.models import User
 from config import Config
@@ -165,9 +165,30 @@ def admin_db_refill(update, context):
             chat_id=update.message.chat_id,
             text=bot_message
         )
+    else:
+        not_enough_permission(update, context)
+
+
+# Drop users table
+def do_drop_users_table(update, context):
+    if check_admin_status(update,context):
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text='Подождите немного, мы удаляем пользователей'
+        )
+
+        bot_message = drop_users_table()
+
+        context.bot.send_message(
+            chat_id=update.message.chat_id,
+            text=bot_message
+        )
+    else:
+        not_enough_permission(update, context)
 
 
 dp.add_handler(CommandHandler(command='dbrefill', callback=admin_db_refill))
+dp.add_handler(CommandHandler(command='dropusers', callback=do_drop_users_table))
 dp.add_handler(ConversationHandler(
     entry_points=[
         CommandHandler(command='newadmin', callback=add_admin_info),
