@@ -40,9 +40,9 @@ def make_schedule_notification(user, lecture, day, time, job_queue):
         )
 
 
-def schedule_notifications_job(context, job_queue, user=None):
+def schedule_notifications_job(context, user=None):
     try:
-        user = job_queue.context
+        user = context.job_queue.context
     except AttributeError:
         pass
     finally:

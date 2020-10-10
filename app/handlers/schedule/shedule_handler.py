@@ -280,16 +280,14 @@ def choose_schedule_group(update, context):
     make_group_schedule(update, context, group, week_day)
 
 
-def show_schedule(update, context, job_queue):
+def show_schedule(update, context):
     week_day = datetime.datetime.weekday(datetime.datetime.now(pytz.timezone('Etc/GMT-3')))
 
     session = Session()
     user = session.query(User).filter(User.tg_chat_id == update.message.chat_id).first()
     if user:
         group = user.group
-        if user.is_notified:
-            job_queue=None
-        make_group_schedule(update, context, group, week_day, job_queue=job_queue)
+        make_group_schedule(update, context, group, week_day)
         return ConversationHandler.END
 
     elif len(context.args) == 0:
@@ -432,7 +430,7 @@ dp.add_handler(CallbackQueryHandler(pattern=schedule_buttons["end"], callback=sc
 
 dp.add_handler(
     ConversationHandler(
-        entry_points=[CommandHandler(command='schedule', callback=show_schedule, pass_args=True, pass_job_queue=True)],
+        entry_points=[CommandHandler(command='schedule', callback=show_schedule, pass_args=True)],
         states={
             FIND_GROUP: [MessageHandler(filters=Filters.text, callback=schedule_group_founded)]
         },
