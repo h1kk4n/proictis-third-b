@@ -21,7 +21,7 @@ def restore_notifications():
 
     for user in users:
         if user.is_notified:
-            schedule_notifications_job(dp.bot, dp.job_queue, user)
+            schedule_notifications_job(dp, user)
             dp.job_queue.run_daily(
                 schedule_notifications_job,
                 time=datetime.time(hour=1, minute=0, tzinfo=pytz.timezone('Etc/GMT-3')),

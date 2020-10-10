@@ -54,13 +54,14 @@ def schedule_notifications_job(context, user=None):
 
         day = datetime.datetime.now(pytz.timezone('Etc/GMT-3'))
         weekday = datetime.datetime.weekday(day)
-        day_schedule = schedule[weekday + 2]
-        time_schedule = schedule[1]
+        if weekday != 6:
+            day_schedule = schedule[weekday + 2]
+            time_schedule = schedule[1]
 
-        for i in range(1, len(day_schedule)):
-            time = time_schedule[i]
-            lecture = day_schedule[i]
-            make_schedule_notification(user, lecture, day, time, job_queue)
+            for i in range(1, len(day_schedule)):
+                time = time_schedule[i]
+                lecture = day_schedule[i]
+                make_schedule_notification(user, lecture, day, time, context.job_queue)
 
 
 if __name__ == '__main__':
