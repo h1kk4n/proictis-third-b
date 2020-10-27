@@ -10,13 +10,13 @@ from app import dp
 
 manual_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'sections')
 manual_buttons = {
-    int(number): button_name.replace('.txt', '') for number, button_name in enumerate(os.listdir(manual_dir))
+    f"s{number}": button_name.replace('.txt', '') for number, button_name in enumerate(os.listdir(manual_dir))
 }
 
 
 def get_manual_keyboard():
     keyboard = [
-        [InlineKeyboardButton(button_text, callback_data=f"manual: {button_data}")]
+        [InlineKeyboardButton(text=button_text, callback_data=f"manual: {button_data}")]
         for button_data, button_text in manual_buttons.items()
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -42,18 +42,18 @@ def do_manual(update, context):
 
 def do_manual_section(update, context):
     query = update.callback_query
-    data = int(query.data.replace('manual: ', ''))
+    data = query.data.replace('manual: ', '')
 
     chat_id = query.message.chat_id
     message_id = query.message.message_id
     section = os.path.join(manual_dir, manual_buttons[data] + '.txt')
-
     keyboard = InlineKeyboardMarkup(
-        [InlineKeyboardButton(text='Назад', callback_data='do_manual')]
+        [[InlineKeyboardButton(text='Назад', callback_data='back_to_manual')]]
     )
 
     with open(section, encoding='utf8') as f:
         section_text = f.read()
+        print(chat_id, message_id, keyboard)
         context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=message_id,
@@ -63,7 +63,7 @@ def do_manual_section(update, context):
 
 
 dp.add_handler(CommandHandler(command='manual', callback=do_manual))
-dp.add_handler(CallbackQueryHandler(pattern='do_manual', callback=do_manual))
+dp.add_handler(CallbackQueryHandler(pattern='back_to_manual', callback=do_manual))
 dp.add_handler(CallbackQueryHandler(pattern='manual', callback=do_manual_section))
 
 if __name__ == '__main__':
