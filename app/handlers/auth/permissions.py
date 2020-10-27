@@ -17,7 +17,9 @@ def is_owner(update):
 
 def is_admin(update):
     user_stats = get_user_info(update)
-    return is_owner(update) or user_stats.is_admin
+    if user_stats:
+        return user_stats.is_admin
+    return is_owner(update)
 
 
 def check_admin_status(update, context):
