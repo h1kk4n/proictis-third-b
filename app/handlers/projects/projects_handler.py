@@ -24,6 +24,10 @@ project_buttons = {
         'end_info': 'sp_end_info',
         'team_info': 'sp_team_info'
     },
+    'write': {
+        'all_teams': 'write_all_teams',
+        'team': 'write_team'
+    },
     'student': 'u',
     'team_end': 'team_end',
     'end': 'project_end'

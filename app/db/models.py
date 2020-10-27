@@ -8,13 +8,13 @@ Base = declarative_base()
 class FirstProject(Base):
     __tablename__ = 'first_project'
     id = Column(Integer, primary_key=True)
-    mentor = Column(String)
-    name = Column(String)
-    additional_info = Column(String)
-    description = Column(String)
-    team_1 = Column(String)
-    team_2 = Column(String)
-    team_3 = Column(String)
+    mentor = Column(String, default=None)
+    name = Column(String, default=None)
+    additional_info = Column(String, default=None)
+    description = Column(String, default=None)
+    team_1 = Column(String, default=None)
+    team_2 = Column(String, default=None)
+    team_3 = Column(String, default=None)
 
     def __repr__(self):
         return f"<b><i>{self.name}</i></b>\n\n" \
@@ -30,13 +30,13 @@ class FirstProject(Base):
 class SecondProject(Base):
     __tablename__ = 'second_project'
     id = Column(Integer, primary_key=True)
-    mentor = Column(String)
-    name = Column(String)
-    additional_info = Column(String)
-    description = Column(String)
-    team_1 = Column(String)
-    team_2 = Column(String)
-    team_3 = Column(String)
+    mentor = Column(String, default=None)
+    name = Column(String, default=None)
+    additional_info = Column(String, default=None)
+    description = Column(String, default=None)
+    team_1 = Column(String, default=None)
+    team_2 = Column(String, default=None)
+    team_3 = Column(String, default=None)
 
     def __repr__(self):
         return f"{self.name}\n\n" \
@@ -51,14 +51,14 @@ class Team(Base):
     __tablename__ = 'teams'
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    member_1 = Column(String)
-    member_2 = Column(String)
-    member_3 = Column(String)
-    member_4 = Column(String)
-    member_5 = Column(String)
-    member_6 = Column(String)
-    member_7 = Column(String)
-    member_8 = Column(String)
+    member_1 = Column(String, default=None)
+    member_2 = Column(String, default=None)
+    member_3 = Column(String, default=None)
+    member_4 = Column(String, default=None)
+    member_5 = Column(String, default=None)
+    member_6 = Column(String, default=None)
+    member_7 = Column(String, default=None)
+    member_8 = Column(String, default=None)
 
     def __repr__(self):
         return f"Команда <b><i>{ self.name }</i></b>\n\n" \
@@ -80,13 +80,14 @@ class User(Base):
     surname = Column(String)
     name = Column(String)
     patronymic = Column(String)
-    group = Column(String)
-    post = Column(String)
-    directions = Column(String)
+    group = Column(String, default=None)
+    post = Column(String, default=None)
+    directions = Column(String, default=None)
     email = Column(String)
     phone = Column(String)
-    is_admin = Column(Boolean)
-    is_notified = Column(Boolean)
+    is_admin = Column(Boolean, default=False)
+    is_notified = Column(Boolean, default=True)
+    verified = Column(Boolean, default=False)
 
     def __repr__(self):
         if self.role == 'student':

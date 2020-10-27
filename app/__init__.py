@@ -14,10 +14,12 @@ updater = Updater(
 
 dp = updater.dispatcher
 
-from app.handlers.routes import achievements_handler, news_handler, contests_handler, mentors_handler
-from app.handlers import start_and_help, admin_panel
-from app.handlers.auth import login_handler, profile_handler
+from app.handlers.routes import achievements_handler, news_handler, contests_handler
+from app.handlers import start_and_help
+from app.handlers.auth import login_handler, profile_handler, admin_panel
 from app.handlers.schedule import shedule_handler
 from app.handlers.projects import projects_handler
+from app.handlers.contacts import contacts_handler
+from app.handlers.manual import manual_handler
 
 

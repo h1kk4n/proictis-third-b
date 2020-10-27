@@ -81,7 +81,7 @@ def do_login_auth(update, context):
             )
             return ConversationHandler.END
 
-        schedule_notifications_job(context, context.job_queue, user)
+        schedule_notifications_job(context, user)
         context.job_queue.run_daily(
             schedule_notifications_job,
             time=datetime.time(hour=1, minute=0, tzinfo=pytz.timezone('Etc/GMT-3')),
