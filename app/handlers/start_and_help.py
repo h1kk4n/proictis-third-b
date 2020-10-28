@@ -5,7 +5,9 @@ from app.handlers.auth.permissions import is_admin
 
 
 def do_start_and_help(update, context):
-    help_message = '''<b><i>Здраствуй, тебя приветствует чат-бот проектного офиса ИКТИБ.</i></b>
+    sti = open('proictis-third-b\app\handlers\start','rb')
+    help_message = (message.chat.id, sti)
+    help_message += '''<b><i>Здраствуй, тебя приветствует чат-бот проектного офиса ИКТИБ.</i></b>
 <i>Для более продуктивной работы советую тебе авторизоваться через сайт проектного офиса</i>
 Просто напиши мне - /login
 Если же ты не зарегистрирован на сайте проектного офиса, напиши мне - /register
@@ -15,8 +17,8 @@ def do_start_and_help(update, context):
 /mentors – Список наставников
 /project - Список проектов
 /news - Последние новости
-/manual - Руководство по проекту(когда оно будет)
-/contacts - Контакты(когда оно будет)
+/manual - Руководство по проекту
+/contacts - Контакты
 /achieves - Достижение студентов
 /contests - Актуальные конкурсы
 
