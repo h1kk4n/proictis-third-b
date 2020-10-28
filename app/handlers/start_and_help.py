@@ -5,7 +5,7 @@ from app.handlers.auth.permissions import is_admin
 
 
 def do_start_and_help(update, context):
-    sti = open('proictis-third-b\app\handlers\start','rb')
+    sti = open('proictis-third-b\app\handlers\start.png','rb')
     help_message = (message.chat.id, sti)
     help_message += '''<b><i>Здраствуй, тебя приветствует чат-бот проектного офиса ИКТИБ.</i></b>
 <i>Для более продуктивной работы советую тебе авторизоваться через сайт проектного офиса</i>
