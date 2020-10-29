@@ -151,7 +151,7 @@ def do_login_password(update, context):
 
     context.bot.send_message(
         chat_id=update.message.chat_id,
-        text=auth_replicas['delete_oass']
+        text=auth_replicas['delete_pass']
     )
 
     return do_login_auth(update, context)

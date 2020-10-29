@@ -1,14 +1,14 @@
 from telegram import InlineKeyboardButton
 
 from app.handlers.projects.projects_handler import project_buttons
-from app.handlers.auth.permissions import get_user_info
+from app.handlers.auth.permissions import get_user_info, is_mentor, is_student
 from app.db.models import User, Team, FirstProject, SecondProject
 from app.db.db import Session
 
 
 def add_write_all_teams_button(update, project, keyboard):
     user = get_user_info(update)
-    if user.role == 'mentor' and project.mentor == f"{user.surname} {user.name} {user.patronymic}" and user.verified\
+    if is_mentor(user=user) and project.mentor == f"{user.surname} {user.name} {user.patronymic}" and user.verified\
             or user.is_admin:
         keyboard.append(
             [InlineKeyboardButton(
@@ -23,7 +23,7 @@ def add_write_all_teams_button(update, project, keyboard):
 def add_write_team_button(update, project_number, team, keyboard):
     user = get_user_info(update)
 
-    if user.role == 'mentor' and user.verified or user.is_admin:
+    if is_mentor(user=user) and user.verified or user.is_admin:
         session = Session()
         mentor_projects = []
         if project_number == 'f':

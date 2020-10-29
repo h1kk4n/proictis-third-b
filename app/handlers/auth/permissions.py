@@ -22,14 +22,20 @@ def is_admin(update):
     return is_owner(update)
 
 
-def is_student(update):
-    user_stats = get_user_info(update)
-    return user_stats.role == 'student'
+def is_student(update=None, user=None):
+    if update is not None:
+        user_stats = get_user_info(update)
+        return user_stats.role == 'student'
+    if user is not None:
+        return user.role == 'student'
 
 
-def is_mentor(update):
-    user_stats = get_user_info(update)
-    return user_stats.role == 'mentor'
+def is_mentor(update=None, user=None):
+    if update is not None:
+        user_stats = get_user_info(update)
+        return user_stats.role == 'mentor'
+    if user is not None:
+        return user.role == 'mentor'
 
 
 def check_admin_status(update, context):
