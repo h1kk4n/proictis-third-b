@@ -179,13 +179,13 @@ def register_pass(update, context):
 
     register_result = complete_registration(context)
 
-    bot_message = ''
     if register_result:
         bot_message = 'Регистрация прошла успешно. Вам на почту было отправлено письмо для подтверждения аккаунта.' \
-                      'Для того, чтобы авторизоваться, используйте команду /login'
+                      ' Для того, чтобы авторизоваться после подтверждения аккаунта, используйте команду /login'
     else:
         bot_message = 'В процессе регистрации возникла ошибка. Возможно, какие-то данные некорректны, либо на сайте' \
-                      'проводятся технические работы. Попробуйте позже'
+                      ' проводятся технические работы. Скорее всего данный email уже зарегестрирован. Можете' \
+                      ' попробовать снова или позже'
 
     context.bot.send_message(
         chat_id=update.message.chat_id,
@@ -241,7 +241,10 @@ def complete_registration(context):
     context.user_data.pop('directions', None)
     context.user_data.pop('password', None)
 
-    return register_result['ok']
+    return register_result.get(
+        'ok',
+        None
+    )
 
 
 def stop_register(update, context):

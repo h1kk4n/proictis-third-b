@@ -33,6 +33,7 @@ class Config:
         'competitions': '/api/competitions',
         'achievements': '/api/achievements',
         'login': '/api/login',
+        'register': '/api/register',
         'requests': '/api/me/requests',
         'archive': '/api/chat/archive',
         'chats': '/api/chats',

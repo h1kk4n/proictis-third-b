@@ -53,7 +53,6 @@ def do_manual_section(update, context):
 
     with open(section, encoding='utf8') as f:
         section_text = f.read()
-        print(chat_id, message_id, keyboard)
         context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=message_id,
