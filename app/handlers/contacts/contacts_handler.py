@@ -38,4 +38,4 @@ def do_contacts(update, context):
             )
 
 
-dp.add_handler(CommandHandler(command='contact', callback=do_contacts))
+dp.add_handler(CommandHandler(command='contacts', callback=do_contacts))

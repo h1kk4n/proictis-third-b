@@ -14,7 +14,7 @@ updater = Updater(
 
 dp = updater.dispatcher
 
-from app.handlers.routes import achievements_handler, news_handler, contests_handler
+from app.handlers.routes import achievements_handler, news_handler, contests_handler, mentors_handler
 from app.handlers import start_and_help
 from app.handlers.auth import login_handler, profile_handler, admin_panel, register_handler
 from app.handlers.schedule import shedule_handler
