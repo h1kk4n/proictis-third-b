@@ -15,8 +15,8 @@ def do_start_and_help(update, context):
 /mentors – Список наставников
 /project - Список проектов
 /news - Последние новости
-/manual - Руководство по проекту(когда оно будет)
-/contacts - Контакты(когда оно будет)
+/manual - Руководство по проекту
+/contacts - Контакты
 /achieves - Достижение студентов
 /contests - Актуальные конкурсы
 
