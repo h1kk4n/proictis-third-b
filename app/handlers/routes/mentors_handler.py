@@ -45,13 +45,6 @@ def do_mentors(update, context):
             )]
         )
 
-    new_keyboard_markup.append(
-        [InlineKeyboardButton(
-            text='Оставить список наставников',
-            callback_data='mentors_list_end'
-        )]
-    )
-
     query = update.callback_query
 
     if query is None:
@@ -98,8 +91,7 @@ def find_mentor(update, context):
     )
 
     keyboard_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton(text='Назад', callback_data='mentors_back'),
-         InlineKeyboardButton(text='Закончить', callback_data='mentors_end')]
+        [InlineKeyboardButton(text='Назад', callback_data='mentors_back')]
     ])
 
     context.bot.send_photo(
@@ -110,32 +102,6 @@ def find_mentor(update, context):
     )
 
 
-def return_to_mentors_list(update, context):
-    mentors_json = app.web_functions.get_json_info(mentors_file_dir, mentors_url)
-
-    bot_message = '<b>Наставники Проектного офиса ИКТИБ:</b>\n\n'
-    for mentor in mentors_json:
-        bot_message += f"-{mentor['surname']} {mentor['name']} {mentor['patronymic']}\n"
-    bot_message += f"\n<i>Источник</i>: {mentors_url.replace('/api', '')}"
-
-    context.bot.edit_message_text(
-        chat_id=update.callback_query.message.chat_id,
-        message_id=update.callback_query.message.message_id,
-        text=bot_message,
-        reply_markup=None
-    )
-
-
-def mentors_end(update, context):
-    context.bot.edit_message_reply_markup(
-        chat_id=update.callback_query.message.chat_id,
-        message_id=update.callback_query.message.message_id,
-        reply_markup=None
-    )
-
-
 dp.add_handler(CommandHandler(command='mentors', callback=do_mentors), group=0)
 dp.add_handler(CallbackQueryHandler(callback=find_mentor, pattern=r'mentor_show'), group=0)
 dp.add_handler(CallbackQueryHandler(callback=do_mentors, pattern='mentors_back'), group=0)
-dp.add_handler(CallbackQueryHandler(callback=mentors_end, pattern='mentors_end'), group=0)
-dp.add_handler(CallbackQueryHandler(callback=return_to_mentors_list, pattern='mentors_list_end'), group=0)

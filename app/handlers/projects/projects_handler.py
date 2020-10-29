@@ -14,14 +14,12 @@ project_buttons = {
         'show': 'show_first_project',
         'themes_end': 'fp_themes_for_end',
         'info': 'fp_info',
-        'end_info': 'fp_end_info',
         'team_info': 'fp_team_info'
     },
     'second': {
         'show': 'show_second_project',
         'themes_end': 'sp_themes_for_end',
         'info': 'sp_info',
-        'end_info': 'sp_end_info',
         'team_info': 'sp_team_info'
     },
     'write': {
@@ -29,7 +27,6 @@ project_buttons = {
         'team': 'write_team'
     },
     'student': 'u',
-    'team_end': 'team_end',
     'end': 'project_end'
 }
 
@@ -127,8 +124,7 @@ def make_project_themes_keyboard(project_table_class, callback_data):
         )
 
     projects_keyboard.append(
-        [InlineKeyboardButton(text='Назад', callback_data=f'{project_buttons["choose"]}'),
-         InlineKeyboardButton(text='Закончить', callback_data=f'{callback_data}_themes_for_end')]
+        [InlineKeyboardButton(text='Назад', callback_data=f'{project_buttons["choose"]}')]
     )
 
     return InlineKeyboardMarkup(projects_keyboard)
@@ -200,7 +196,6 @@ def make_project_team_info_with_keyboard(request_data, callback_data):
                 project = 's'
 
             if members[i] is not None:
-                print(f"{project_buttons['student']}: {members[i]} {team_id} {project} {project_number}")
                 keyboard.append(
                     [InlineKeyboardButton(
                         text=founded_members[i],
@@ -209,23 +204,9 @@ def make_project_team_info_with_keyboard(request_data, callback_data):
                 )
 
         keyboard.append(
-            [InlineKeyboardButton(text='Назад', callback_data=f'{callback_data}_info: {project_number}'),
-             InlineKeyboardButton(text='Закончить', callback_data=f'{project_buttons["team_end"]}: {team_id}')]
+            [InlineKeyboardButton(text='Назад', callback_data=f'{callback_data}_info: {project_number}')]
         )
         return founded_team, InlineKeyboardMarkup(keyboard)
-
-
-def team_end(update, context):
-    query = update.callback_query
-    data = query.data
-    team_id = int(data.replace(f"{project_buttons['team_end']}: ", ""))
-
-    team_info = str(find_team_info(team_id=team_id))
-
-    context.bot.send_message(
-        chat_id=query.message.chat_id,
-        text=team_info
-    )
 
 
 def projects_end(update, context):
@@ -282,21 +263,6 @@ def first_projects_themes_buttons(update, context):
     )
 
 
-def first_project_themes_for_end(update, context):
-    query = update.callback_query
-
-    themes_list = get_project_themes_list(FirstProject)
-
-    bot_message = 'Темы первого творческого проекта:\n\n' + themes_list
-
-    context.bot.edit_message_text(
-        chat_id=query.message.chat_id,
-        message_id=query.message.message_id,
-        text=bot_message,
-        reply_markup=None
-    )
-
-
 def first_project_info(update, context):
     query = update.callback_query
 
@@ -305,11 +271,7 @@ def first_project_info(update, context):
     bot_message, keyboard = make_project_info_with_keyboard(FirstProject, project_number)
 
     keyboard.append(
-        [InlineKeyboardButton(text='Назад', callback_data=f'{project_buttons["first"]["show"]}'),
-         InlineKeyboardButton(
-             text='Закончить',
-             callback_data=f'{project_buttons["first"]["end_info"]}: {project_number}'
-         )]
+        [InlineKeyboardButton(text='Назад', callback_data=f'{project_buttons["first"]["show"]}')]
     )
 
     context.bot.edit_message_text(
@@ -317,22 +279,6 @@ def first_project_info(update, context):
         message_id=query.message.message_id,
         text=bot_message,
         reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-
-
-def first_projects_end_info(update, context):
-    query = update.callback_query
-    chat_id = query.message.chat_id
-    message_id = query.message.message_id
-    project_number = int(query.data.replace(f'{project_buttons["first"]["end_info"]}: ', ''))
-
-    bot_message = make_project_info(FirstProject, project_number)
-
-    context.bot.edit_message_text(
-        chat_id=chat_id,
-        message_id=message_id,
-        text=bot_message,
-        reply_markup=None
     )
 
 
@@ -371,21 +317,6 @@ def second_projects_themes_buttons(update, context):
     )
 
 
-def second_project_themes_for_end(update, context):
-    query = update.callback_query
-
-    themes_list = get_project_themes_list(SecondProject)
-
-    bot_message = 'Темы второго творческого проекта:\n\n' + themes_list
-
-    context.bot.edit_message_text(
-        chat_id=query.message.chat_id,
-        message_id=query.message.message_id,
-        text=bot_message,
-        reply_markup=None
-    )
-
-
 def second_project_info(update, context):
     query = update.callback_query
 
@@ -394,11 +325,7 @@ def second_project_info(update, context):
     bot_message, keyboard = make_project_info_with_keyboard(SecondProject, project_number)
 
     keyboard.append(
-        [InlineKeyboardButton(text='Назад', callback_data=f'{project_buttons["second"]["show"]}'),
-         InlineKeyboardButton(
-             text='Закончить',
-             callback_data=f'{project_buttons["second"]["end_info"]}: {project_number}'
-         )]
+        [InlineKeyboardButton(text='Назад', callback_data=f'{project_buttons["second"]["show"]}')]
     )
 
     context.bot.edit_message_text(
@@ -406,19 +333,6 @@ def second_project_info(update, context):
         message_id=query.message.message_id,
         text=bot_message,
         reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-
-
-def second_projects_end_info(update, context):
-    project_number = int(update.callback_query.data.replace(f'{project_buttons["second"]["end_info"]}: ', ''))
-
-    bot_message = make_project_info(SecondProject, project_number)
-
-    context.bot.edit_message_text(
-        chat_id=update.callback_query.message.chat_id,
-        message_id=update.callback_query.message.message_id,
-        text=bot_message,
-        reply_markup=None
     )
 
 
@@ -477,13 +391,6 @@ def show_student_info(update, context):
             )]
         )
 
-    keyboard[-1].append(
-        InlineKeyboardButton(
-             text='Закончить',
-             callback_data=f'{project_buttons["end"]}'
-        )
-    )
-
     keyboard = InlineKeyboardMarkup(keyboard)
 
     if user:
@@ -520,29 +427,13 @@ dp.add_handler(CallbackQueryHandler(callback=show_projects, pattern=project_butt
 
 # First creative project handlers
 dp.add_handler(CallbackQueryHandler(callback=first_projects_themes_buttons, pattern=project_buttons["first"]["show"]))
-dp.add_handler(CallbackQueryHandler(
-    callback=first_project_themes_for_end,
-    pattern=project_buttons["first"]["themes_end"]
-))
 dp.add_handler(CallbackQueryHandler(callback=first_project_info, pattern=project_buttons["first"]["info"]))
-dp.add_handler(CallbackQueryHandler(callback=first_projects_end_info, pattern=project_buttons["first"]["end_info"]))
 dp.add_handler(CallbackQueryHandler(callback=first_project_team_info, pattern=project_buttons["first"]["team_info"]))
 
 # Second creative project handlers
 dp.add_handler(CallbackQueryHandler(callback=second_projects_themes_buttons, pattern=project_buttons["second"]["show"]))
-dp.add_handler(CallbackQueryHandler(
-    callback=second_project_themes_for_end,
-    pattern=project_buttons["second"]["themes_end"]
-))
 dp.add_handler(CallbackQueryHandler(callback=second_project_info, pattern=project_buttons["second"]["info"]))
-dp.add_handler(CallbackQueryHandler(callback=second_projects_end_info, pattern=project_buttons["second"]["end_info"]))
 dp.add_handler(CallbackQueryHandler(callback=second_project_team_info, pattern=project_buttons["second"]["team_info"]))
 
 # User Info
 dp.add_handler(CallbackQueryHandler(callback=show_student_info, pattern=project_buttons['student']))
-
-dp.add_handler(CallbackQueryHandler(callback=team_end, pattern=project_buttons['team_end']))
-dp.add_handler(CallbackQueryHandler(callback=projects_end, pattern=project_buttons['end']))
-
-if __name__ == '__main__':
-    print(make_member_pattern(''))

@@ -10,11 +10,18 @@ from app import dp
 from app.db.models import User
 from app.db.db import Session
 from app.handlers.schedule.notifications import schedule_notifications_job
+from app.handlers.schedule.shedule_handler import NoEntriesException, ChoicesException, WentWrongException
 from config import Config
 
 
 LOGIN_EMAIL, LOGIN_PASSWORD, LOGIN_END = range(3)
 LOGIN_URL = Config.BASE_URL + Config.url_path['login']
+
+auth_replicas = {
+    'enter_pass': 'Введите пароль:',
+    'notification_error': '''Пока я пытался установить уведомления на ваш аккаунт произошла ошибка. 
+Возможно расписание недоступно или в профиле указана неверная группа. Попробуйте позже'''
+}
 
 
 def do_login_email(update, context):
@@ -22,7 +29,7 @@ def do_login_email(update, context):
 
     context.bot.send_message(
         chat_id=update.message.chat_id,
-        text='Введите пароль:'
+        text=auth_replicas['enter_pass']
     )
     return LOGIN_PASSWORD
 
@@ -69,9 +76,7 @@ def do_login_auth(update, context):
                 email=user_info['email'],
                 phone=user_info['phone'],
                 post=user_info['post'],
-                directions=user_info['directions'],
-                is_admin=False,
-                is_notified=True
+                directions=user_info['directions']
             )
 
         else:
@@ -81,14 +86,21 @@ def do_login_auth(update, context):
             )
             return ConversationHandler.END
 
-        schedule_notifications_job(context, user)
-        context.job_queue.run_daily(
-            schedule_notifications_job,
-            time=datetime.time(hour=1, minute=0, tzinfo=pytz.timezone('Etc/GMT-3')),
-            days=(0, 1, 2, 3, 4, 5),
-            context=user,
-            name='Обновить расписание'
-        )
+        try:
+            schedule_notifications_job(context, user)
+            context.job_queue.run_daily(
+                schedule_notifications_job,
+                time=datetime.time(hour=1, minute=0, tzinfo=pytz.timezone('Etc/GMT-3')),
+                days=(0, 1, 2, 3, 4, 5),
+                context=user,
+                name='Обновить расписание'
+            )
+            user.is_notified = True
+        except (NoEntriesException, WentWrongException, ChoicesException):
+            context.bot.send_message(
+                chat_id=user.tg_chat_id,
+                text=auth_replicas['notification_error']
+            )
 
         session.add(user)
         session.commit()

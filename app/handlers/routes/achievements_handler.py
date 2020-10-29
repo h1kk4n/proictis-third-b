@@ -62,8 +62,7 @@ def do_achievements(update, context):
 
     keyboard_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton(text="Подробнее", callback_data='achievements_more'),
-         InlineKeyboardButton(text='Показать все', callback_data='achievements_show_all')],
-         [InlineKeyboardButton(text="Закончить", callback_data='achievements_end')]
+         InlineKeyboardButton(text='Показать все', callback_data='achievements_show_all')]
     ])
 
     context.bot.send_message(
@@ -131,8 +130,7 @@ def find_achievements(update, context):
 
     keyboard_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton(text="Назад", callback_data='achievements_back'),
-         InlineKeyboardButton(text='Показать все', callback_data='achievements_to_all')],
-         [InlineKeyboardButton(text="Закончить", callback_data='achievements_end')]
+         InlineKeyboardButton(text='Показать все', callback_data='achievements_to_all')]
     ])
     context.bot.send_photo(
         chat_id=update.callback_query.message.chat_id,
@@ -178,8 +176,7 @@ def return_to_achievements_list(update, context):
 
     keyboard_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton(text="Подробнее", callback_data='achievements_more'),
-         InlineKeyboardButton(text='Показать все', callback_data='achievements_show_all')],
-         [InlineKeyboardButton(text="Закончить", callback_data='achievements_end')]
+         InlineKeyboardButton(text='Показать все', callback_data='achievements_show_all')]
     ])
 
     context.bot.edit_message_text(
@@ -195,14 +192,6 @@ def return_to_achievements_list(update, context):
     )
 
 
-def achievements_end(update, context):
-    context.bot.edit_message_reply_markup(
-        chat_id=update.callback_query.message.chat_id,
-        message_id=update.callback_query.message.message_id,
-        reply_markup=None
-    )
-
-
 dp.add_handler(CommandHandler(command='achieves', callback=do_achievements), group=3)
 dp.add_handler(CallbackQueryHandler(callback=more_achievements, pattern='achievements_more'), group=3)
 dp.add_handler(CallbackQueryHandler(callback=show_all_achievements, pattern='achievements_show_all'), group=3)
@@ -210,4 +199,3 @@ dp.add_handler(CallbackQueryHandler(callback=find_achievements, pattern=r'achiev
 dp.add_handler(CallbackQueryHandler(callback=achievements_back, pattern='achievements_back'), group=3)
 dp.add_handler(CallbackQueryHandler(callback=achievements_back_to_all, pattern='achievements_to_all'), group=3)
 dp.add_handler(CallbackQueryHandler(callback=return_to_achievements_list, pattern='achievements_return'), group=3)
-dp.add_handler(CallbackQueryHandler(callback=achievements_end, pattern='achievements_end'), group=3)

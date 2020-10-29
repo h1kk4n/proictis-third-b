@@ -205,8 +205,7 @@ def make_group_schedule(update, context, group_query, weekday_query=0, week_num=
                     )
                 ],
                 [
-                    InlineKeyboardButton(text='Все недели', callback_data=f'{schedule_buttons["all"]}: { group }'),
-                    InlineKeyboardButton(text='Закончить', callback_data=f'{schedule_buttons["end"]}')
+                    InlineKeyboardButton(text='Все недели', callback_data=f'{schedule_buttons["all"]}: { group }')
                 ]
             ]
         )

@@ -62,8 +62,7 @@ def do_contests(update, context):
 
     keyboard_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton(text="Подробнее", callback_data='contests_more'),
-         InlineKeyboardButton(text='Показать все', callback_data='contests_show_all')],
-        [InlineKeyboardButton(text="Закончить", callback_data='contests_end')]
+         InlineKeyboardButton(text='Показать все', callback_data='contests_show_all')]
     ])
 
     context.bot.send_message(
@@ -131,8 +130,7 @@ def find_contests(update, context):
 
     keyboard_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton(text="Назад", callback_data='contests_back'),
-         InlineKeyboardButton(text='Показать все', callback_data='contests_to_all')],
-        [InlineKeyboardButton(text="Закончить", callback_data='contests_end')]
+         InlineKeyboardButton(text='Показать все', callback_data='contests_to_all')]
     ])
     context.bot.send_photo(
         chat_id=update.callback_query.message.chat_id,
@@ -178,8 +176,7 @@ def return_to_contests_list(update, context):
 
     keyboard_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton(text="Подробнее", callback_data='contests_more'),
-         InlineKeyboardButton(text='Показать все', callback_data='contests_show_all')],
-        [InlineKeyboardButton(text="Закончить", callback_data='contests_end')]
+         InlineKeyboardButton(text='Показать все', callback_data='contests_show_all')]
     ])
 
     context.bot.edit_message_text(
@@ -195,14 +192,6 @@ def return_to_contests_list(update, context):
     )
 
 
-def contests_end(update, context):
-    context.bot.edit_message_reply_markup(
-        chat_id=update.callback_query.message.chat_id,
-        message_id=update.callback_query.message.message_id,
-        reply_markup=None
-    )
-
-
 dp.add_handler(CommandHandler(command='contests', callback=do_contests), group=2)
 dp.add_handler(CallbackQueryHandler(callback=more_contests, pattern='contests_more'), group=2)
 dp.add_handler(CallbackQueryHandler(callback=show_all_contests, pattern='contests_show_all'), group=2)
@@ -210,4 +199,3 @@ dp.add_handler(CallbackQueryHandler(callback=find_contests, pattern=r'contests: 
 dp.add_handler(CallbackQueryHandler(callback=contests_back, pattern='contests_back'), group=2)
 dp.add_handler(CallbackQueryHandler(callback=contests_back_to_all, pattern='contests_to_all'), group=2)
 dp.add_handler(CallbackQueryHandler(callback=return_to_contests_list, pattern='contests_return'), group=2)
-dp.add_handler(CallbackQueryHandler(callback=contests_end, pattern='contests_end'), group=2)

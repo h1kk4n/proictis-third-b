@@ -4,8 +4,6 @@ from telegram import InlineKeyboardMarkup
 from telegram.ext import CommandHandler
 from telegram.ext import CallbackQueryHandler
 
-from pprint import pprint
-
 import app.web_functions
 from config import Config
 from app import dp
@@ -64,8 +62,7 @@ def do_news(update, context):
 
     keyboard_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton(text="Подробнее", callback_data='news_more'),
-         InlineKeyboardButton(text='Показать все', callback_data='news_show_all')],
-         [InlineKeyboardButton(text="Закончить", callback_data='news_end')]
+         InlineKeyboardButton(text='Показать все', callback_data='news_show_all')]
     ])
 
     context.bot.send_message(
@@ -133,8 +130,7 @@ def find_news(update, context):
 
     keyboard_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton(text="Назад", callback_data='news_back'),
-         InlineKeyboardButton(text='Показать все', callback_data='news_to_all')],
-         [InlineKeyboardButton(text="Закончить", callback_data='news_end')]
+         InlineKeyboardButton(text='Показать все', callback_data='news_to_all')]
     ])
     context.bot.send_photo(
         chat_id=update.callback_query.message.chat_id,
@@ -180,8 +176,7 @@ def return_to_news_list(update, context):
 
     keyboard_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton(text="Подробнее", callback_data='news_more'),
-         InlineKeyboardButton(text='Показать все', callback_data='news_show_all')],
-         [InlineKeyboardButton(text="Закончить", callback_data='news_end')]
+         InlineKeyboardButton(text='Показать все', callback_data='news_show_all')]
     ])
 
     context.bot.edit_message_text(
@@ -197,14 +192,6 @@ def return_to_news_list(update, context):
     )
 
 
-def news_end(update, context):
-    context.bot.edit_message_reply_markup(
-        chat_id=update.callback_query.message.chat_id,
-        message_id=update.callback_query.message.message_id,
-        reply_markup=None
-    )
-
-
 dp.add_handler(CommandHandler(command='news', callback=do_news), group=1)
 dp.add_handler(CallbackQueryHandler(callback=more_news, pattern='news_more'), group=1)
 dp.add_handler(CallbackQueryHandler(callback=show_all_news, pattern='news_show_all'), group=1)
@@ -212,4 +199,3 @@ dp.add_handler(CallbackQueryHandler(callback=find_news, pattern=r'news: .+'), gr
 dp.add_handler(CallbackQueryHandler(callback=news_back, pattern='news_back'), group=1)
 dp.add_handler(CallbackQueryHandler(callback=news_back_to_all, pattern='news_to_all'), group=1)
 dp.add_handler(CallbackQueryHandler(callback=return_to_news_list, pattern='news_return'), group=1)
-dp.add_handler(CallbackQueryHandler(callback=news_end, pattern='news_end'), group=1)
