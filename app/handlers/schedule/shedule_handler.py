@@ -284,16 +284,7 @@ def show_schedule(update, context):
 
     session = Session()
     user = session.query(User).filter(User.tg_chat_id == update.message.chat_id).first()
-    if user:
-        group = user.group
-        make_group_schedule(update, context, group, week_day)
-        return ConversationHandler.END
-
-    elif len(context.args) == 0:
-        find_group(update, context)
-        return FIND_GROUP
-
-    elif len(context.args) == 1:
+    if len(context.args) == 1:
         group_query = context.args[0]
         message_id = update.message.message_id + 1
         context.user_data['group_query' + str(message_id)] = group_query
@@ -301,6 +292,15 @@ def show_schedule(update, context):
         make_group_schedule(update, context, group_query, week_day)
 
         return ConversationHandler.END
+
+    elif user:
+        group = user.group
+        make_group_schedule(update, context, group, week_day)
+        return ConversationHandler.END
+
+    elif len(context.args) == 0:
+        find_group(update, context)
+        return FIND_GROUP
 
     else:
         return ConversationHandler.END

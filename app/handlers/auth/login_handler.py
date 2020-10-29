@@ -18,9 +18,17 @@ LOGIN_EMAIL, LOGIN_PASSWORD, LOGIN_END = range(3)
 LOGIN_URL = Config.BASE_URL + Config.url_path['login']
 
 auth_replicas = {
-    'enter_pass': 'Введите пароль:',
-    'notification_error': '''Пока я пытался установить уведомления на ваш аккаунт произошла ошибка. 
-Возможно расписание недоступно или в профиле указана неверная группа. Попробуйте позже'''
+    'too_much_args': 'Передано больше двух аргументов. Сообщение удалено, т.к. оно могло содержать пароль\n\n' +
+                     'Используя команду /login, вводите только электронную почту и пароль.',
+    'enter_email': 'Введите вашу электронную почту',
+    'enter_pass': 'Введите пароль',
+    'delete_pass': '* сообщение с паролем удалено *',
+    'something_gone_wrong': 'Что-то пошло не так в последнюю секунду',
+    'not_activated_account': 'Вы не активировали свой аккаунт Проектного Офиса ИКТИБ',
+    'notification_error': 'Пока я пытался установить уведомления на ваш аккаунт произошла ошибка. ' +
+                          'Возможно расписание недоступно или в профиле указана неверная группа. Попробуйте позже',
+    'logout': 'Вы вышли из сети. Теперь вы для нас загадка',
+    'not_logged': 'Вы не авторизованы'
 }
 
 
@@ -82,7 +90,7 @@ def do_login_auth(update, context):
         else:
             context.bot.send_message(
                 chat_id=update.message.chat_id,
-                text="Что-то пошло не так в последнюю секунду"
+                text=auth_replicas['something_gone_wrong']
             )
             return ConversationHandler.END
 
@@ -118,13 +126,13 @@ def do_login_auth(update, context):
             if 'message' == "User didn't activated account.":
                 context.bot.sendMessage(
                     chat_id=update.message.chat_id,
-                    text="Вы не активировали свой аккаунт Проектного Офиса ИКТИБ"
+                    text=auth_replicas['not_activated_account']
                 )
 
         else:
             context.bot.sendMessage(
                 chat_id=update.message.chat_id,
-                text="Что-то пошло не так, попробуйте еще раз или позже"
+                text=auth_replicas['something_gone_wrong']
             )
 
     del context.user_data['email']
@@ -143,7 +151,7 @@ def do_login_password(update, context):
 
     context.bot.send_message(
         chat_id=update.message.chat_id,
-        text='* сообщение с паролем удалено *'
+        text=auth_replicas['delete_oass']
     )
 
     return do_login_auth(update, context)
@@ -169,8 +177,7 @@ def do_login(update, context):
 
             context.bot.send_message(
                 chat_id=update.message.chat_id,
-                text='Передано больше двух аргументов. Сообщение удалено, т.к. оно могло содержать пароль\n\n' +
-                     'Используя команду /login, вводите только электронную почту и пароль.'
+                text=auth_replicas['too_much_args']
             )
 
             return ConversationHandler.END
@@ -190,14 +197,14 @@ def do_login(update, context):
 
             context.bot.send_message(
                 chat_id=update.message.chat_id,
-                text='Введите пароль:'
+                text=auth_replicas['enter_pass']
             )
             return LOGIN_PASSWORD
 
         else:
             context.bot.send_message(
                 chat_id=update.message.chat_id,
-                text='Введите вашу электронную почту:'
+                text=auth_replicas['enter_email']
             )
             return LOGIN_EMAIL
 
@@ -213,13 +220,13 @@ def do_logout(update, context):
 
         context.bot.send_message(
             chat_id=update.message.chat_id,
-            text='Вы вышли из сети. Теперь вы для нас загадка'
+            text=auth_replicas['logout']
         )
 
     else:
         context.bot.send_message(
             chat_id=update.message.chat_id,
-            text='Вы не авторизованы'
+            text=auth_replicas['not_logged']
         )
 
     session.close()

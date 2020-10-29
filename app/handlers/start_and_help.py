@@ -3,13 +3,14 @@ from telegram.ext import CommandHandler
 from app import dp
 from app.handlers.auth.permissions import is_admin
 
-
-def do_start_and_help(update, context):
-    help_message = '''<b><i>Здраствуй, тебя приветствует чат-бот проектного офиса ИКТИБ.</i></b>
+help_replica = {
+    'ordinary_help': '''<b><i>Здраствуй, тебя приветствует чат-бот проектного офиса ИКТИБ.</i></b>
 <i>Для более продуктивной работы советую тебе авторизоваться через сайт проектного офиса</i>
 Просто напиши мне - /login
 Если же ты не зарегистрирован на сайте проектного офиса, напиши мне - /register
 Чтобы узнать свои данные - используй команду /profile
+
+/start, /help выведут это сообщение
 
 <i>Если тебе интересна информация о проектном офисе, можешь воспользоваться следующими функциями</i>
 /mentors – Список наставников
@@ -26,10 +27,8 @@ def do_start_and_help(update, context):
 
 <i>На данный момент бот не может узнать, обновил ли ты информацию на сайте</i>, так что для вступления 
 новых данных в силу необходимо ввести команду /logout и повторно авторизоваться\n
-'''
-
-    if is_admin(update):
-        help_message += '''<b><i>Админ-панель</i></b>:
+''',
+    'admin_help': '''<b><i>Админ-панель</i></b>:
 /newadmin - добавить нового модератора
 /deladmin - убрать пользователя из списка модераторов
 
@@ -38,9 +37,19 @@ def do_start_and_help(update, context):
 /dbrefill - перезаполнить таблицы проектов (перезаполнит данные для функции /project, использовать в случае, если 
 появились новые проекты и сформировались команды)
 /dropusers - сбросить таблицу пользователей\n
-'''
+''',
+    'help_end': 'Если все понятно - напиши мне'
 
-    help_message += 'Если все понятно - напиши мне'
+}
+
+
+def do_start_and_help(update, context):
+    help_message = help_replica['ordinary_help']
+
+    if is_admin(update):
+        help_message += help_replica['admin_help']
+
+    help_message += help_replica['help_end']
 
     context.bot.send_message(
         chat_id=update.message.chat_id,
