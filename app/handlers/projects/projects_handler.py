@@ -6,6 +6,7 @@ from telegram import InlineKeyboardButton
 from app import dp
 from app.db.db import Session
 from app.db.models import FirstProject, SecondProject, Team, User
+from app.handlers.projects.communication import add_write_team_button
 
 
 project_buttons = {
@@ -21,10 +22,6 @@ project_buttons = {
         'themes_end': 'sp_themes_for_end',
         'info': 'sp_info',
         'team_info': 'sp_team_info'
-    },
-    'write': {
-        'all_teams': 'write_all_teams',
-        'team': 'write_team'
     },
     'student': 'u',
     'end': 'project_end'
@@ -151,7 +148,7 @@ def make_member_pattern(member):
         return None
 
 
-def make_project_team_info_with_keyboard(request_data, callback_data):
+def make_project_team_info_with_keyboard(update, request_data, callback_data):
     founded_team = None
     try:
         team_id = int(request_data.split()[1])
@@ -203,6 +200,7 @@ def make_project_team_info_with_keyboard(request_data, callback_data):
                     )]
                 )
 
+        keyboard = add_write_team_button(update, callback_data, founded_team, keyboard)
         keyboard.append(
             [InlineKeyboardButton(text='Назад', callback_data=f'{callback_data}_info: {project_number}')]
         )
@@ -286,7 +284,7 @@ def first_project_team_info(update, context):
     query = update.callback_query
     request_data = query.data.replace(f'{project_buttons["first"]["team_info"]}: ', '')
 
-    team, keyboard = make_project_team_info_with_keyboard(request_data, 'fp')
+    team, keyboard = make_project_team_info_with_keyboard(query, request_data, 'fp')
 
     bot_message = f"Команда <b><i>{ team.name }</i></b>\n\n" \
                   f"<b>Участники</b>:\n"
@@ -341,7 +339,7 @@ def second_project_team_info(update, context):
 
     request_data = query.data.replace(f'{project_buttons["second"]["team_info"]}: ', '')
 
-    team, keyboard = make_project_team_info_with_keyboard(request_data, 'sp')
+    team, keyboard = make_project_team_info_with_keyboard(query, request_data, 'sp')
 
     bot_message = f"Команда <b><i>{team.name}</i></b>\n\n" \
                   f"<b>Участники</b>:\n"

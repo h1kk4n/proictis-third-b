@@ -76,17 +76,17 @@ class Team(Base):
 class User(Base):
     __tablename__ = 'users'
     tg_chat_id = Column(Integer, primary_key=True)
-    role = Column(String)
-    surname = Column(String)
-    name = Column(String)
-    patronymic = Column(String)
-    group = Column(String, default=None)
-    post = Column(String, default=None)
-    directions = Column(String, default=None)
-    email = Column(String)
-    phone = Column(String)
+    role = Column(String, default='-')
+    surname = Column(String, default='-')
+    name = Column(String, default='-')
+    patronymic = Column(String, default='-')
+    group = Column(String, default='-')
+    post = Column(String, default='-')
+    directions = Column(String, default='-')
+    email = Column(String, default='-')
+    phone = Column(String, default='-')
     is_admin = Column(Boolean, default=False)
-    is_notified = Column(Boolean, default=True)
+    is_notified = Column(Boolean, default=False)
     verified = Column(Boolean, default=False)
 
     def __repr__(self):
@@ -97,9 +97,10 @@ class User(Base):
                    f"<u>Почта</u>: {self.email}\n" \
                    f"<u>Телефон</u>: {self.phone}"
         if self.role == 'mentor':
-            return f"Вы <b><i>{self.surname} {self.name} {self.patronymic}</i><b/>\n\n" \
+            return f"Вы <b><i>{self.surname} {self.name} {self.patronymic}</i></b>\n\n" \
                    f"<u>Роль</u>: наставник\n" \
                    f"<u>Должность</u>: {self.post}\n" \
                    f"<u>Направления</u>: {self.directions}\n" \
                    f"<u>Почта</u>: {self.email}\n" \
                    f"<u>Телефон</u>: {self.phone}"
+        return "ошибка"

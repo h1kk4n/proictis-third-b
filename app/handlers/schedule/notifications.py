@@ -1,7 +1,7 @@
 import datetime
 import pytz
 
-from app.handlers.schedule.shedule_handler import get_schedule, banned_lecture_list
+from app.handlers.schedule.shedule_handler import get_schedule, banned_lecture_list, NoEntriesException
 from app import dp
 
 
@@ -51,13 +51,14 @@ def schedule_notifications_job(context, user=None):
             schedule = get_schedule(user.group)['table']['table']
         elif user.role == 'mentor':
             schedule = get_schedule(user.surname)['table']['table']
-
         day = datetime.datetime.now(pytz.timezone('Etc/GMT-3'))
         weekday = datetime.datetime.weekday(day)
         if weekday != 6:
-            day_schedule = schedule[weekday + 2]
-            time_schedule = schedule[1]
-
+            try:
+                day_schedule = schedule[weekday + 2]
+                time_schedule = schedule[1]
+            except IndexError:
+                raise NoEntriesException
             for i in range(1, len(day_schedule)):
                 time = time_schedule[i]
                 lecture = day_schedule[i]

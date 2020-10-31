@@ -77,7 +77,7 @@ def register_surname(update, context):
             chat_id=update.message.chat_id,
             text='Введите вашу должность'
         )
-        return REG_ROLE
+        return REG_POST
     else:
         context.bot.send_message(
             chat_id=update.message.chat_id,
